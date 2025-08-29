@@ -19,7 +19,7 @@ const User=require('./models/User')
 const cookieParser = require('cookie-parser')
 const session = require('express-session');
 const uri = process.env.MONGO_URI;
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 const imageKitAuth = require('./utils/imageKit');
 const videoRoutes=require('./apis/videoRoutes')
