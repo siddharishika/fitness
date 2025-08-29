@@ -19,7 +19,7 @@ const User=require('./models/User')
 const cookieParser = require('cookie-parser')
 const session = require('express-session');
 const uri = process.env.MONGO_URI;
-const PORT=process.env.PORT || 8080;
+const PORT = process.env.PORT || 5000;
 
 const imageKitAuth = require('./utils/imageKit');
 const videoRoutes=require('./apis/videoRoutes')
@@ -27,6 +27,9 @@ const authRoutes=require('./apis/authRoute');
 const programRoutes=require('./apis/programRoutes');
 const recipeRoutes=require('./apis/recipeRoutes');
 const myJourneyRoutes=require('./apis/myJourney')
+
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -80,19 +83,20 @@ app.use(programRoutes);
 app.use(recipeRoutes);
 app.use(myJourneyRoutes);
 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+});
 
 mongoose
-  .connect(uri)
-  .then(() => {
-    console.log("Successfully connected to database");
+  .connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
-  .catch((err) => {
-    console.log(`Error ${err} connecting to database`);
-  });
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 
 app.listen(PORT, ()=>{
     console.log("Server connected at port ",PORT);
 })
 
-// module.exports = {imagekit};
