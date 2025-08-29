@@ -9,7 +9,7 @@ const router=express.Router();
 router.post('/addprogram',isLoggedIn, async(req,res)=>{
     
     try{
-        let {name,numberOfDays, schedule, equipment, typeOfProgram, description, timePerDay }=req.body;
+        let {name,tags, numberOfDays, schedule, equipment, typeOfProgram, description, timePerDay }=req.body;
         let coach=req.user._id;
         let fitnessVideos=await FitnessVideo.find({})
         let arr=[];
@@ -22,7 +22,7 @@ router.post('/addprogram',isLoggedIn, async(req,res)=>{
             }
             
         }
-        await Program.create( {coach, name,numberOfDays, schedule:arr, equipment, typeOfProgram, description, timePerDay });
+        await Program.create( {coach,tags, name,numberOfDays, schedule:arr, equipment, typeOfProgram, description, timePerDay });
 
         res.status(201).json({msg: "Gotcha"} );
     }catch(e){
@@ -33,7 +33,7 @@ router.post('/addprogram',isLoggedIn, async(req,res)=>{
 router.get('/allprograms' , async(req,res)=>{
     try{
         
-        let programs=await Program.find({}).populate([{path: 'schedule'}]);
+        let programs=await Program.find({}).limit(5).populate([{path: 'schedule'}]);
         
         res.status(201).json({msg: "Gotcha",data:programs});
     }catch(e){

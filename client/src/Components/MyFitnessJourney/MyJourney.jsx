@@ -36,7 +36,7 @@ function MyJourney() {
         <h3>My Liked Videos</h3>
         <button onClick={handleUserLikedVideos}>Liked Videos</button>
         <button onClick={handleUserLikedPrograms} >Liked Programs</button>
-        <button>Liked Programs</button>
+        {/* <button>Liked Programs</button> */}
         <button>Liked Recipes</button>
         {user && user.likedVideos && 
             user.likedRecipes.map((vid,idx)=>{

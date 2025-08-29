@@ -13,7 +13,7 @@ import axios from 'axios';
 // var filePath="";
 // var fileUrl="";
 
-function Upload() {
+function Upload(tags) {
     const navigate=useNavigate();
     let [file, setFile] = useState();
     // let [name, setName]=useState("");

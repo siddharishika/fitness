@@ -13,7 +13,7 @@ const Program = require('../models/Program');
 
 router.get('/allvideos' , async(req,res)=>{
     try{
-        let fitnessVideos=await FitnessVideo.find({}).populate('coach');
+        let fitnessVideos=await FitnessVideo.find({}).limit(3).populate('coach');
         // let coach=fitnessVideos
         // let coach=await User.find({});
 
@@ -259,7 +259,19 @@ router.post('/changevideolike',isLoggedIn, async(req,res)=>{
      }
 })
 
+router.get('/allvideos/:tag' , async(req,res)=>{
+    try{
+        let tag = req.params.tag;
+        let fitnessVideos = await FitnessVideo.find({ tags: tag }).limit(5).populate('coach');        // let coach=fitnessVideos
+        // let coach=await User.find({});
 
+        // fitnessVideos=await fitnessVideos.populate('coach');
+        res.status(201).json({msg: "Gotcha",data:fitnessVideos});
+    }catch(e){
+        res.status(400).json({msg: "Something went wrong..." });
+
+    }
+})
 
 
 

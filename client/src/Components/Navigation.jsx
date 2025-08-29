@@ -34,28 +34,50 @@ function Navigation() {
         e.preventDefault();
         navigate('/allprograms');
     }
+    const handleAllRecipes=(e)=>{
+        e.preventDefault();
+        navigate('/allrecipes');
+    }
+    const handleMyJourney=(e)=>{
+        e.preventDefault();
+        navigate('/myjourney');
+    }
+    
+    const handleAllVideos=(e)=>{
+        e.preventDefault();
+        navigate('/workoutvideos/tags');
+    }
   return (
+
     <Navbar collapseOnSelect expand="lg" data-bs-theme="dark" className="bg-body-tertiary">
       <Container>
-      <Navbar.Brand style={{color:'rgb(209, 48, 75)'}} href="#home">Rishika Siddha</Navbar.Brand>
+      <Navbar.Brand style={{color:'rgb(209, 48, 75)'}} href="#home">Fitness Social</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
-         
+          {/* <Nav className="me-auto"> */}
           <Nav>
-            <Nav.Link className='main-nav-1' onClick={handleadd}>Add new Video</Nav.Link>
-            <Nav.Link className='main-nav-1' onClick={handleSignUp}>Signup</Nav.Link>
-            <Nav.Link className='main-nav-1' onClick={handleLogin}>Login</Nav.Link>
-            <Nav.Link className='main-nav-1' onClick={handleLogout}>Logout</Nav.Link>
-            <Nav.Link className='main-nav-1' onClick={handleAllPrograms}>All Programs</Nav.Link>
+            <Nav.Link className='main-nav-1' onClick={handleMyJourney}>My Fitness Journey</Nav.Link>
+            <Nav.Link className='main-nav-1' onClick={handleAllPrograms}>Workout Programs</Nav.Link>
+            <Nav.Link className='main-nav-1' onClick={handleAllVideos}>Workout Videos</Nav.Link>
+            <Nav.Link className='main-nav-1' onClick={handleAllRecipes}>Recipes</Nav.Link>
             <Nav.Link className='main-nav-1' href="#contact">Say Hello👋</Nav.Link>
-
             
-           
+          </Nav>
+          <Nav className="ms-auto">
+            {/* <Nav.Link href="#deets">More deets</Nav.Link>
+            <Nav.Link eventKey={2} href="#memes">
+              Dank memes
+            </Nav.Link> */}
+            <Nav.Link className='main-nav-1' onClick={handleLogin}>Login</Nav.Link>
+            <Nav.Link className='main-nav-1' onClick={handleSignUp}>Signup</Nav.Link>
+            <Nav.Link className='main-nav-1' onClick={handleLogout}>Logout</Nav.Link>
+
           </Nav>
         </Navbar.Collapse>
       </Container>
     </Navbar>
   );
+
 
 
 
