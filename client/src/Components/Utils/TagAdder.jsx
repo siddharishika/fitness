@@ -1,4 +1,5 @@
 import { IoAddOutline, IoCheckmarkSharp } from "react-icons/io5";
+ 
 import React, { useRef, useState, useEffect } from "react";
 import {
   ButtonGroup,
@@ -7,6 +8,9 @@ import {
   Row,
   Col,
 } from "react-bootstrap";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 function TagAdder({ tags: initialTags = [], onTagsChange }) {
   const [tags, setTags] = useState(initialTags);

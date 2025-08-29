@@ -1,9 +1,12 @@
 import axios from 'axios';
 import { IKImage, IKVideo } from 'imagekitio-react';
-import React, { useEffect, useRef, useState } from 'react'
+ 
+import React, { useEffect, useRef, useState } from "react";
 import Show from './Show';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardGroup } from 'react-bootstrap';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
 // import {useHistory} from 'react-router-dom';
 function AllVideosTags(tags) {
   let navigate=useNavigate();

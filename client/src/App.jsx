@@ -1,43 +1,63 @@
-import React from 'react'
-import './App.css'
-import { Route , Routes } from 'react-router-dom'
-import { IKContext } from 'imagekitio-react';
-import Upload from './Components/Video/Upload';
-import AllVideos from './Components/Video/AllVideos';
-import AllVideosTags from './Components/Video/AllVideosTags';
-import SignUp from './Components/Video/SignUp';
-import Navigation from './Components/Navigation';
-import Login from './Components/Auth/Login';
-import axios from 'axios'
-import Show from './Components/Video/Show';
-import EditVideo from './Components/Video/EditVideo';
-import UploadDemo from './Components/Video/UploadDemo';
-import AddProgram from './Components/Program/AddProgram';
-import AllPrograms from './Components/Program/AllPrograms';
-import ShowProgram from './Components/Program/ShowProgram';
-import EditProgram from './Components/Program/EditProgram';
-import AddRecipe from './Components/Recipe/AddRecipe';
-import AllRecipes from './Components/Recipe/AllRecipes';
-import ShowRecipe from './Components/Recipe/ShowRecipe';
-import MyJourney from './Components/MyFitnessJourney/MyJourney';
-import LikedVideos from './Components/MyFitnessJourney/LikedVideos';
-import MyVideos from './Components/MyFitnessJourney/MyVideos';
-import LikedPrograms from './Components/MyFitnessJourney/LikedPrograms';
-import LikedRecipes from './Components/MyFitnessJourney/LikedRecipes';
-import MyPrograms from './Components/MyFitnessJourney/MyPrograms';
-import MyRecipes from './Components/MyFitnessJourney/MyRecipes';
-import Home from './Components/Home/Home';
+import React from "react";
+import "./App.css";
+import { Route, Routes } from "react-router-dom";
+import { IKContext } from "imagekitio-react";
+import Upload from "./Components/Video/Upload";
+import AllVideos from "./Components/Video/AllVideos";
+import AllVideosTags from "./Components/Video/AllVideosTags";
+import SignUp from "./Components/Video/SignUp";
+import Navigation from "./Components/Navigation";
+import Login from "./Components/Auth/Login";
+import axios from "axios";
+import Show from "./Components/Video/Show";
+import EditVideo from "./Components/Video/EditVideo";
+import UploadDemo from "./Components/Video/UploadDemo";
+import AddProgram from "./Components/Program/AddProgram";
+import AllPrograms from "./Components/Program/AllPrograms";
+import ShowProgram from "./Components/Program/ShowProgram";
+import EditProgram from "./Components/Program/EditProgram";
+import AddRecipe from "./Components/Recipe/AddRecipe";
+import AllRecipes from "./Components/Recipe/AllRecipes";
+import ShowRecipe from "./Components/Recipe/ShowRecipe";
+import MyJourney from "./Components/MyFitnessJourney/MyJourney";
+import LikedVideos from "./Components/MyFitnessJourney/LikedVideos";
+import MyVideos from "./Components/MyFitnessJourney/MyVideos";
+import LikedPrograms from "./Components/MyFitnessJourney/LikedPrograms";
+import LikedRecipes from "./Components/MyFitnessJourney/LikedRecipes";
+import MyPrograms from "./Components/MyFitnessJourney/MyPrograms";
+import MyRecipes from "./Components/MyFitnessJourney/MyRecipes";
+import Home from "./Components/Home/Home";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
 function App() {
-  const publicKey = "public_hqcMKg5zm7N3LPo9FksQQRaePeM=";
-  const urlEndpoint = "https://ik.imagekit.io/6p3jtqlgt/";
-  let id="";
-  const tags=["Beginner","Intermediate","Advanced", "Wight Loss", "Abs", "Strength Training", "Cardio", "Yoga", "Pilates", "Flexibility"
-      , "Booty", "Legs", "Ärms", "Upper Body", "Lower Body", "Full Body", "HIIT", "Dance", "Boxing", "Martial Arts", "Stretching",
-      "No Equipment"
-    ];
+  const publicKey = import.meta.env.publicKey; ;
+  const urlEndpoint = import.meta.env.urlEndpoint; ;
+  let id = "";
+  const tags = [
+    "Beginner",
+    "Intermediate",
+    "Advanced",
+    "Wight Loss",
+    "Abs",
+    "Strength Training",
+    "Cardio",
+    "Yoga",
+    "Pilates",
+    "Flexibility",
+    "Booty",
+    "Legs",
+    "Ärms",
+    "Upper Body",
+    "Lower Body",
+    "Full Body",
+    "HIIT",
+    "Dance",
+    "Boxing",
+    "Martial Arts",
+    "Stretching",
+    "No Equipment",
+  ];
 
-
- 
   // authenticator();
   return (
     <div className="App">
@@ -75,9 +95,6 @@ function App() {
       </Routes>
     </div>
   );
-
-  
-  
 }
 
-export default App
+export default App;

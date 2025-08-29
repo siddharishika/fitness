@@ -25,3 +25,6 @@ client/dist/    # Vite frontend build
 *.njsproj
 *.sln
 *.sw?
+
+
+.env

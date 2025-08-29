@@ -1,4 +1,5 @@
 import axios from 'axios';
+ 
 import React, { useEffect, useRef, useState } from "react";
 import {
   ButtonGroup,
@@ -13,6 +14,8 @@ import { IoAddOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import TagAdder from "../Utils/TagAdder";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
 var file = {};
 var imgFile = {};
 function UploadDemo(props) {
@@ -66,7 +69,7 @@ function UploadDemo(props) {
       if (!info.imgFile.name || !info.file.name) {
         console.log("Please add files first");
       } else {
-        let res = await axios.post("http://localhost:8080/add", formData, {
+        let res = await axios.post(`${API_BASE_URL}/add`, formData, {
           withCredentials: true,
         });
         if (

@@ -1,9 +1,11 @@
 import axios from 'axios';
-import React, { useEffect, useRef, useState } from 'react'
+ 
+import React, { useEffect, useRef, useState } from "react";
 import { IconContext } from 'react-icons';
 import { IoAddOutline, IoRemoveCircleOutline } from 'react-icons/io5';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
 var file={};
 var imgFile={};
 // var arr=[];

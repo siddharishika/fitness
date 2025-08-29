@@ -1,8 +1,12 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import ShowProgram from './ShowProgram';
-import { useNavigate } from 'react-router-dom';
+ 
+import React, { useEffect, useState } from "react";
+import ShowProgram from "./ShowProgram";
+import { useNavigate } from "react-router-dom";
 import { Card, CardGroup } from "react-bootstrap";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 function AllPrograms() {
   let navigate = useNavigate();
@@ -17,7 +21,7 @@ function AllPrograms() {
   }
   useEffect(function () {
     async function getProgram() {
-      let res = await axios.get("http://localhost:8080/allprograms", {
+      let res = await axios.get(`${API_BASE_URL}/allprograms`, {
         withCredentials: true,
       });
       // setVideo(res.data.data);

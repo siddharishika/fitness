@@ -7,6 +7,9 @@ import axios from "axios";
 import { ButtonGroup, Container } from "react-bootstrap";
 import TagAdder from "../Utils/TagAdder";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
+
 var info = [];
 function AddProgram(props) {
   // let [arr,setArr]=useState([]);
@@ -142,7 +145,7 @@ function AddProgram(props) {
     data.description = descriptionRef.current.value;
     data.timePerDay = timeRef.current.value;
     try {
-      let res = await axios.post("http://localhost:8080/addprogram", data, {
+      let res = await axios.post(`${API_BASE_URL}/addprogram`, data, {
         withCredentials: true,
       });
       navigate("/allprograms");
