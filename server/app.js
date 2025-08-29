@@ -82,9 +82,7 @@ app.use(myJourneyRoutes);
 
 
 mongoose
-  .connect(
-    uri
-  )
+  .connect(uri)
   .then(() => {
     console.log("Successfully connected to database");
   })
