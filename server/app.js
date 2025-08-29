@@ -8,16 +8,18 @@ const multer=require('multer');
 const dotenv=require('dotenv').config();
 const uploadRoutes=require('./apis/uploadRoute');
 const bodyParser = require('body-parser');
-
+const { MongoClient, ServerApiVersion } = require("mongodb");
 const sharp=require('sharp');
 const ImageKit = require('imagekit');
 const LocalStrategy =require('passport-local');
-const passport=require('passport');
+const passport = require('passport');
+
 const passportLocalMongoose =require('passport-local-mongoose');
 const User=require('./models/User')
 const cookieParser = require('cookie-parser')
 const session = require('express-session');
-
+const uri = process.env.MONGO_URI;
+const PORT=process.env.PORT || 8080;
 
 const imageKitAuth = require('./utils/imageKit');
 const videoRoutes=require('./apis/videoRoutes')
@@ -77,15 +79,20 @@ app.use(authRoutes);
 app.use(programRoutes);
 app.use(recipeRoutes);
 app.use(myJourneyRoutes);
-mongoose.connect('mongodb://127.0.0.1:27017/fitness')
-.then(()=>{
-    console.log("Successfully connected to database");
-})
-.catch((err)=>{
-    console.log(`Error ${err} connecting to database`)
-})
 
-const PORT=8080;
+
+mongoose
+  .connect(
+    uri
+  )
+  .then(() => {
+    console.log("Successfully connected to database");
+  })
+  .catch((err) => {
+    console.log(`Error ${err} connecting to database`);
+  });
+
+
 app.listen(PORT, ()=>{
     console.log("Server connected at port ",PORT);
 })

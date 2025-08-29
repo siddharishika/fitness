@@ -18,7 +18,7 @@ router.get('/allvideos' , async(req,res)=>{
         // let coach=await User.find({});
 
         // fitnessVideos=await fitnessVideos.populate('coach');
-        res.status(201).json({msg: "Gotcha",data:fitnessVideos});
+        res.status(200).json({msg: "Gotcha",data:fitnessVideos});
     }catch(e){
         res.status(400).json({msg: "Something went wrong..." });
 
@@ -266,13 +266,16 @@ router.get('/allvideos/:tag' , async(req,res)=>{
         // let coach=await User.find({});
 
         // fitnessVideos=await fitnessVideos.populate('coach');
-        res.status(201).json({msg: "Gotcha",data:fitnessVideos});
+        res.status(200).json({msg: "Gotcha",data:fitnessVideos});
     }catch(e){
         res.status(400).json({msg: "Something went wrong..." });
 
     }
 })
 
+router.get("/test", (req, res) => {
+  res.status(200).json({ msg: "Test route working" });
+});
 
 
 module.exports=router;
