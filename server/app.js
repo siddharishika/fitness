@@ -69,11 +69,27 @@ passport.deserializeUser(User.deserializeUser());
 
 
 
-app.use(cors({
-    origin : ["http://localhost:5173"],
-    credentials: true,
+const allowedOrigins = [
+  "http://localhost:5173", // local frontend
+  "https://fitness-updated.onrender.com", // deployed frontend
+];
 
-}))
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin like Postman
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true, // allow cookies and credentials
+  })
+);
+
 
 
 app.use(uploadRoutes);
