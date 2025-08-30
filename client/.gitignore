@@ -28,3 +28,4 @@ client/dist/    # Vite frontend build
 
 
 .env
+.env.production
