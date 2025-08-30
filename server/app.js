@@ -71,7 +71,7 @@ passport.deserializeUser(User.deserializeUser());
 
 const allowedOrigins = [
   "http://localhost:5173", // local frontend
-  "https://fitness-updated.onrender.com", // deployed frontend
+  "https://fitness-social.onrender.com", // deployed frontend
 ];
 
 app.use(
