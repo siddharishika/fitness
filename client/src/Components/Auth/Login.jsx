@@ -3,6 +3,9 @@ import axios from 'axios';
 import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
+
 function Login() {
   var navigate = useNavigate();
   var nameRef = useRef();
@@ -28,7 +31,7 @@ function Login() {
 
   return (
     <div>
-      <form type="submit" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="username">Username:</label>
         <input ref={nameRef} type="text" name="username" />
         <label htmlFor="password">Password</label>

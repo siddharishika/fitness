@@ -13,7 +13,6 @@ function Home() {
   let imgRef = useRef("");
 
   let [fitnessVideo, setVideo] = useState([]);
-  console.log("API BASE URL", `${API_BASE_URL}/allvideos`);
   // const history = useHistory();
   useEffect(function () {
     async function getVideo() {

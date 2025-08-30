@@ -70,7 +70,7 @@ function App() {
         <Route path="/workoutvideos" element={<AllVideos />} />
         {/* <Route path='/new' element={<Upload />}/> */}
         <Route
-          path="workoutvideos/tags"
+          path="/workoutvideos/tags"
           element={<AllVideosTags tags={tags} />}
         />
         <Route path="/new" element={<UploadDemo tags={tags} />} />
