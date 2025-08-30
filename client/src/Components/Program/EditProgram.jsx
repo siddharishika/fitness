@@ -272,7 +272,7 @@ function EditProgram() {
         </div>
       </IconContext.Provider>
       <ul ref={containerTypeRef} id="typeOfWorkout">
-        {typeArr.map((ele, idx) => {
+        {typeArr && typeArr.map((ele, idx) => {
           return (
             <li key={idx}>
               <h5>{ele}</h5>
@@ -291,7 +291,7 @@ function EditProgram() {
         </div>
       </IconContext.Provider>
       <ul ref={equipmentRefContainer}>
-        {equipArr.map((ele, idx) => {
+        {equipArr && equipArr.map((ele, idx) => {
           return (
             <li key={idx}>
               <h5>{ele}</h5>

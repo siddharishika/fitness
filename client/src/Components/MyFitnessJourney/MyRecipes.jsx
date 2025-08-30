@@ -53,7 +53,7 @@ function MyRecipes() {
 
   return (
     <div>
-      {data.map((recipe, idx) => {
+      {data && data.map((recipe, idx) => {
         return (
           <div key={idx}>
             <div onClick={(e) => handleShowRecipe(recipe)}>

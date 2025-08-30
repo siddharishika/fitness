@@ -110,7 +110,7 @@ function UploadDemo(props) {
           </div>
         </IconContext.Provider>
         <ul ref={tagsContainerRef}>
-          {arr.map(function (ele, idx) {
+          {arr && arr.map(function (ele, idx) {
             return <li key={idx}>{ele}</li>;
           })}
         </ul>

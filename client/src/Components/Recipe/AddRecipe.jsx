@@ -90,7 +90,7 @@ function AddRecipe() {
       <div onClick={handleIngredients}>+</div>
       <br />
       <ul>
-        {ingredients.map((ele, idx) => {
+        {ingredients && ingredients.map((ele, idx) => {
           return (
             <li key={idx}>
               <div>{ele.ingredient}</div>
@@ -123,7 +123,7 @@ function AddRecipe() {
       <div onClick={handleProcess}>+</div>
       <br />
       <ul>
-        {process.map((ele, idx) => {
+        {process && process.map((ele, idx) => {
           return <li key={idx}>{ele}</li>;
         })}
       </ul>
@@ -132,7 +132,7 @@ function AddRecipe() {
       <input type="text" ref={tagRef} />
       <div onClick={handleTag}>+</div>
       <ul>
-        {tags.map((tag, idx) => {
+        {tags && tags.map((tag, idx) => {
           return <li key={idx}>{tag}</li>;
         })}
       </ul>

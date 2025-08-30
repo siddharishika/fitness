@@ -38,13 +38,13 @@ function AllRecipes() {
 
               <h3>Tags</h3>
               <ul>
-                {recipe.tags.map((tag, i) => {
+                {recipe && recipe.tags && recipe.tags.map((tag, i) => {
                   return <li key={i}>{tag}</li>;
                 })}
               </ul>
               <h3>Ingredients</h3>
               <ul>
-                {recipe.ingredients.map((ingr, i) => {
+                {recipe && recipe.ingredients && recipe.ingredients.map((ingr, i) => {
                   return (
                     <li key={i}>
                       {ingr.ingredient + "          " + ingr.amount}
@@ -54,7 +54,7 @@ function AllRecipes() {
               </ul>
               <h3>How to cook?</h3>
               <ul>
-                {recipe.process.map((step, i) => {
+                {recipe && recipe.process && recipe.process.map((step, i) => {
                   return <li key={i}>{step}</li>;
                 })}
               </ul>

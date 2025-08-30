@@ -147,7 +147,7 @@ function Upload(tags) {
           </div>
         </IconContext.Provider>
         <ul>
-          {arr.map(function (ele, idx) {
+          {arr && arr.map(function (ele, idx) {
             return <li key={idx}>{ele}</li>;
           })}
         </ul>

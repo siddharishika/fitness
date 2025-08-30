@@ -36,7 +36,7 @@ function AllPrograms() {
   return (
     <div>
       <CardGroup>
-        {programs.map((program, idx) => (
+        {programs && programs.map((program, idx) => (
           <Card
             key={idx}
             style={{ cursor: "pointer" }}
@@ -55,7 +55,7 @@ function AllPrograms() {
                 <strong>Description:</strong> {program.description}
                 <br />
                 <strong>Equipment:</strong>{" "}
-                {program.equipment.map((equip, i) => (
+                {program && program.equipment && program.equipment.map((equip, i) => (
                   <span key={i}>
                     {equip}
                     {i < program.equipment.length - 1 ? ", " : ""}
@@ -63,7 +63,7 @@ function AllPrograms() {
                 ))}
                 <br />
                 <strong>Type:</strong>{" "}
-                {program.typeOfProgram.map((typ, i) => (
+                {program && program.typeOfProgram && program.typeOfProgram.map((typ, i) => (
                   <span key={i}>
                     {typ}
                     {i < program.typeOfProgram.length - 1 ? ", " : ""}

@@ -153,7 +153,7 @@ function EditVideo() {
         <div onClick={handlePlus}>+</div>
         <ul ref={containerRef} id='container'>
           {
-            arr.map((tag,idx)=>{
+            arr && arr.map((tag,idx)=>{
                 return (
                     // <div id={idx} >
                     <div key={idx}>

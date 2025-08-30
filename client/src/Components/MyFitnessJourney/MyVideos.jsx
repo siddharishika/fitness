@@ -57,7 +57,7 @@ function MyVideos() {
   };
   return (
     <div>
-      {vids.map((vid, idx) => {
+      {vids && vids.map((vid, idx) => {
         return (
           <div key={idx}>
             <img src={vid.imgFileUrl} alt="" height="300" width="400" />

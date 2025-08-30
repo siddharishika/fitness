@@ -25,13 +25,7 @@ function AllVideos() {
     getVideo();
   }, []);
 
-  // let x=fitnessVideo[0];
-  // fitnessVideo.map((vid,idx)=>{
-  // })
   const showVideo = (ele) => {
-    // let p=e.target.attributes[0].nodeValue;
-
-    // console.log("This is p", p);
     navigate(`/show`, { state: ele });
   };
 
@@ -39,7 +33,7 @@ function AllVideos() {
     <div>
       {
         <CardGroup>
-          {fitnessVideo.map(function (vid, idx) {
+          {fitnessvideo && fitnessVideo.map(function (vid, idx) {
             return (
               <Card key={idx}>
                 <Card.Img

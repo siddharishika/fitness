@@ -62,7 +62,7 @@ function TagAdder({ tags: initialTags = [], onTagsChange }) {
       <Container>
         {chunkArray(tags, Math.ceil(tags.length / 5)).map((rowTags, rowIdx) => (
           <Row key={rowIdx} className="mb-2">
-            {rowTags.map((tag, idx) => (
+            {rowTags && rowTags.map((tag, idx) => (
               <Col key={idx}>
                 <ToggleButton
                   className="mb-2"
