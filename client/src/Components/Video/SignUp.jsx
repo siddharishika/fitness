@@ -16,7 +16,8 @@ function SignUp() {
   let passwordRef = useRef("");
   let passwordcRef = useRef("");
   let [role, setRole] = useState("");
-  let [profilePicture, setProfilePicture] = useState();
+  let profilePictureRef = useRef("");
+  var [profilePicture, setProfilePicture] = useState();
   const onOptionChange = (e) => {
     setRole(e.target.value);
   };
@@ -85,6 +86,7 @@ function SignUp() {
         <input
           name="profilePicture"
           type="file"
+          ref={profilePictureRef}
           onChange={handleFileChange}
           accept="image/*"
           required

@@ -7,9 +7,8 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 function MyPrograms() {
-  // let [vids,setVids]=useState([]);
   let navigate = useNavigate();
-  let [data, setData] = useState();
+  let [data, setData] = useState([]);
   useEffect(function () {
     async function getMyVideos() {
       let res = await axios.get(`${API_BASE_URL}/getmyprograms`, {

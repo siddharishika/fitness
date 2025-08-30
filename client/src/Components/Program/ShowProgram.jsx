@@ -11,7 +11,6 @@ function ShowProgram() {
   let [selectedValue, setSelect] = useState(1);
   const params = useParams();
   let [arr, setArr] = useState([]);
-  // let [program, setProgram]=useState();
   let [vids, setVids] = useState([]);
   let [show, setShow] = useState([]);
   let navigate = useNavigate();

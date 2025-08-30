@@ -10,8 +10,6 @@ const API_BASE_URL =
 
 var info = [];
 function EditProgram() {
-  // let [arr,setArr]=useState([]);
-  // let [equipment ,setEquipment]=useState([]);
   let location = useLocation();
   let data = location.state;
   let equipment = [];
@@ -24,10 +22,7 @@ function EditProgram() {
   let noOfDaysRef = useRef();
   const params = useParams();
   let [selectedValue, setSelect] = useState(1);
-  // let [arr,setArr]=useState([]);
   var [checked, setChecked] = useState(data.schedule);
-  // let [vid , setVid]=useState({_id:"", name:"",fileId:"", fileUrl:""
-  // , filePath:"", imgFileId:"",imgFilePath:"",imgFileUrl:"" , tags:[],coach:{}});
   let [vid, setVid] = useState([]);
   let [vid2, setVid2] = useState({});
   let timeRef = useRef();

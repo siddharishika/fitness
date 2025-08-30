@@ -7,7 +7,6 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 function MyRecipes() {
-  // let [vids,setVids]=useState([]);
   let navigate = useNavigate();
   let [data, setData] = useState([]);
   useEffect(function () {

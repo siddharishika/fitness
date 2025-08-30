@@ -12,8 +12,6 @@ const API_BASE_URL =
 
 var info = [];
 function AddProgram(props) {
-  // let [arr,setArr]=useState([]);
-  // let [equipment ,setEquipment]=useState([]);
   let equipment = [];
   let typeRef = useRef();
   let equipmentRef = useRef();
@@ -24,10 +22,7 @@ function AddProgram(props) {
   let noOfDaysRef = useRef();
   const params = useParams();
   let [selectedValue, setSelect] = useState("PLease select an option");
-  // let [arr,setArr]=useState([]);
   var [checked, setChecked] = useState([]);
-  // let [vid , setVid]=useState({_id:"", name:"",fileId:"", fileUrl:""
-  // , filePath:"", imgFileId:"",imgFilePath:"",imgFileUrl:"" , tags:[],coach:{}});
   let [vid, setVid] = useState([]);
   let timeRef = useRef();
   let descriptionRef = useRef();
