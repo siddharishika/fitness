@@ -23,7 +23,7 @@ function Home() {
     }
     getVideo();
   }, []);
-
+  console.log("This is fitness video", fitnessVideo);
   const showVideo = (ele) => {
     navigate(`/show`, { state: ele });
   };

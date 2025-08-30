@@ -16,7 +16,7 @@ router.get('/allvideos' , async(req,res)=>{
         let fitnessVideos=await FitnessVideo.find({}).limit(3).populate('coach');
         // let coach=fitnessVideos
         // let coach=await User.find({});
-
+        console.log("This is fitness videos", fitnessVideos);
         // fitnessVideos=await fitnessVideos.populate('coach');
         res.status(200).json({msg: "Gotcha",data:fitnessVideos});
     }catch(e){
