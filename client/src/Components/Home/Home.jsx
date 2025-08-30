@@ -33,7 +33,7 @@ function Home() {
       <h2>Workout Videos</h2>
       <br />
       <CardGroup>
-        {fitnessVideo.map(function (vid, idx) {
+        {fitnessVideo && fitnessVideo.map(function (vid, idx) {
           return (
             <Card key={idx}>
               <Card.Img
@@ -68,7 +68,7 @@ function Home() {
       <h2>Workout Videos</h2>
       <br />
       <CardGroup>
-        {fitnessVideo.map(function (vid, idx) {
+        {fitnessVideo && fitnessVideo.map(function (vid, idx) {
           return (
             <Card key={idx}>
               <Card.Img

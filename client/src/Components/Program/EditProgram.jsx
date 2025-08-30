@@ -235,7 +235,7 @@ function EditProgram() {
       </select>
       <br />
       <div>
-        {vid.length > 0 &&
+        {vid &&
           checked.length > 0 &&
           vid.map((ele, idx) => {
             return (

@@ -33,7 +33,7 @@ function AllVideos() {
     <div>
       {
         <CardGroup>
-          {fitnessvideo && fitnessVideo.map(function (vid, idx) {
+          {fitnessVideo && fitnessVideo.map(function (vid, idx) {
             return (
               <Card key={idx}>
                 <Card.Img

@@ -36,7 +36,7 @@ function LikedVideos() {
   return (
     <div>
       <h1>My Liked Videos</h1>
-      {data.likedVideos &&
+      {data && data.likedVideos &&
         data.likedVideos.map((vid, idx) => {
           return (
             <div key={idx} onClick={(e) => handleShow(vid)}>

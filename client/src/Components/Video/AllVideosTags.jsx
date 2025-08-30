@@ -49,7 +49,7 @@ function AllVideosTags(tags) {
             <div key={tag}>
               <h3>{tag}</h3>
               <CardGroup>
-              {videos.map((video, idx) => (
+              {videos && videos.map((video, idx) => (
                 <div key={video._id || idx}>
                 <Card>
                   <Card.Img variant="top" onClick={() => showVideo(video)}
