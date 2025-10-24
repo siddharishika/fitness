@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { IKVideo } from 'imagekitio-react';
-import ReactPlayer from "react-player";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Rating from '../Utils/Rating';
