@@ -26,7 +26,7 @@ function EditVideo() {
     
     useEffect(function (){
         async function getVideo(){
-            let res = await axios.get(`http://localhost:8080/show/${data}`  ,{withCredentials: true});
+            let res = await axios.get(`${API_BASE_URL}/show/${data}`  ,{withCredentials: true});
             // setVid(res.data.data);
             let {_id, name,fileId, fileUrl, filePath, imgFileId,imgFilePath,imgFileUrl , coach,tags}=res.data.data;
             let {username}=coach;
@@ -64,20 +64,39 @@ function EditVideo() {
                 // formData.append("file",file);
                 let info=Object.fromEntries(formData);
                 if(f && imgf){
-                    let res1=await axios.delete(`http://localhost:8080/delete/${vid._id}`,  {withCredentials: true});
-                    let res=await axios.post(`http://localhost:8080/add/`, formData ,{withCredentials: true})
+                    let res1 = await axios.delete(
+                      `${API_BASE_URL}/delete/${vid._id}`,
+                      { withCredentials: true }
+                    );
+                    let res = await axios.post(
+                      `${API_BASE_URL}/add/`,
+                      formData,
+                      { withCredentials: true }
+                    );
                     fn(res);
                 }
                 if(f && !imgf){
-                    let res=await axios.patch(`http://localhost:8080/edit/f/${vid._id}`, formData ,{withCredentials: true})
+                    let res = await axios.patch(
+                      `${API_BASE_URL}/edit/f/${vid._id}`,
+                      formData,
+                      { withCredentials: true }
+                    );
                     fn(res);
                 }
                 if(imgf && !f){
-                    let res=await axios.patch(`http://localhost:8080/edit/imgf/${vid._id}`, formData ,{withCredentials: true})
+                    let res = await axios.patch(
+                      `${API_BASE_URL}/edit/imgf/${vid._id}`,
+                      formData,
+                      { withCredentials: true }
+                    );
                     fn(res);
                 }
                 else if(!imgf && !f && (b1 || b2)){
-                    let res=await axios.patch(`http://localhost:8080/edit/${vid._id}`, formData ,{withCredentials: true})
+                    let res = await axios.patch(
+                      `${API_BASE_URL}/edit/${vid._id}`,
+                      formData,
+                      { withCredentials: true }
+                    );
                     fn(res);
                 }
                 

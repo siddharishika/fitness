@@ -64,6 +64,21 @@ const isCoach=async(req,res,next)=>{
     next();
 }
 
+const isNotCoach = async (req, res, next) => {
+  let coach = req.user._id;
+  let user = await User.findById(coach);
+  if (user.role == "coach") {
+    console.log("You are a coach");
+    res.status(200).send({
+      success: false,
+      message: "You are a coach",
+    });
+    return;
+  }
+  console.log("You are not a coach");
+  next();
+};
+
 const isVideoAuthor =async(req,res,next)=>{
     let {id} = req.params;
     let found=await FitnessVideo.findById(id);
@@ -80,5 +95,25 @@ const isVideoAuthor =async(req,res,next)=>{
     
 }
 
-
-module.exports={validateVideo ,isLoggedIn , isCoach ,isVideoAuthor};
+const isNotVideoAuthor = async (req, res, next) => {
+  let { id } = req.params;
+  let found = await FitnessVideo.findById(id);
+  if (req.user._id.equals(found.coach)) {
+    console.log("You are the author of this video, so cant review or rate");
+    next();
+  } else {
+    res.status(200).send({
+      success: false,
+      message: "You are not the author of this video",
+    });
+    return;
+  }
+};
+module.exports = {
+  validateVideo,
+  isLoggedIn,
+  isCoach,
+  isVideoAuthor,
+  isNotVideoAuthor,
+  isNotCoach,
+};

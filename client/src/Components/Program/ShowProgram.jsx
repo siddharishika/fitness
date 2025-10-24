@@ -18,7 +18,7 @@ function ShowProgram() {
     function () {
       async function getProgram() {
         let res = await axios.get(
-          `http://localhost:8080/showprogram/${program._id}`,
+          `${API_BASE_URL}/showprogram/${program._id}`,
           { withCredentials: true }
         );
         let { vids } = res.data.data;

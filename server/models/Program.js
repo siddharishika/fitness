@@ -53,12 +53,30 @@ const programSchema = new mongoose.Schema(
         ref: 'User',
         required: [true, 'A video must belong to an coach'],
       },
-      rating:{
-        type: Number,
-        min:0,
-        max:5,
-        default: 0
-      },
+       rating: [
+            {
+              userRating: {
+                type: Number,
+                min: 0,
+                max: 5,
+                default: 0,
+              },
+              user: {
+                type: mongoose.Schema.ObjectId,
+                ref: "User",
+              },
+            },
+          ],
+          currentRating: {
+            type: Number,
+            min: 0,
+            max: 5,
+            default: 0,
+          },
+          currentRatingCount: {
+            type: Number,
+            default: 0,
+          },
       reviews:[{
         review:{
             type:String,

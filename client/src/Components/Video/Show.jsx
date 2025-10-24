@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { IKVideo } from 'imagekitio-react';
- 
+import ReactPlayer from "react-player";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { StarRatings } from "react-star-ratings";
+import Rating from '../Utils/Rating';
+import VideoPlayer from '../Utils/VideoPlayer';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
@@ -12,7 +13,6 @@ function Show() {
   let location = useLocation();
   let data = location.state;
   let navigate = useNavigate();
-  let [rating, setRating] = useState("0");
   let [vid, setVid] = useState({
     name: "",
     username: "",
@@ -21,17 +21,27 @@ function Show() {
   });
   const params = useParams();
   let [like, setLike] = useState(false);
+  let [newrating, setNewRating] = useState(vid.currentRating); 
   useEffect(
     function () {
       async function getVideo() {
-        let res = await axios.get(`http://localhost:8080/show/${data._id}`, {
+        let res = await axios.get(`${API_BASE_URL}/show/${data._id}`, {
           withCredentials: true,
         });
         // setVid(res.data.data);
-        let { name, fileUrl, coach, _id } = res.data.data;
+        let { name, fileUrl, coach, _id, rating, reviews, currentRating, currentRatingCount} = res.data.data;
         let { username } = coach;
         // let id=_id;
-        setVid({ name, username, fileUrl, _id });
+        setVid({
+          name,
+          username,
+          fileUrl,
+          _id,
+          rating,
+          reviews,
+          currentRating,
+          currentRatingCount,
+        });
       }
       getVideo();
     },
@@ -55,23 +65,19 @@ function Show() {
       console.log(e, "Nahi ho payega");
     }
   };
-  const changeRating = (newRating, name) => {
-    setRating(newRating);
-  };
+  console.log("Rating in show:", newrating);
   return (
     <div>
-      {/* <IKVideo
-        path={vid.filePath}
-        transformation={[{ "width": "30vw", "height": "30vh" }]}
-        controls={true}
-        /> */}
       <h1>{vid.name}</h1>
-      <h3>{vid.username}</h3>
-      <video src={vid.fileUrl} width="30%" height="20%" controls />
+      <VideoPlayer url={vid.fileUrl} />
+      <h3>Coach: {vid.username}</h3>
+      <h3>Current Rating: {vid.currentRating}</h3>
       <button onClick={handleVideoLike}>Add to likes</button>
+      <h3>Rate this video</h3>
+      <Rating videoId={vid._id} currentRating={vid.currentRating} currentRatingCount={vid.currentRatingCount} isVideo={true} />
+      <br />
+      <br />
       <form action="">
-        <label htmlFor="rating">Rating</label>
-        <div></div>
         <label htmlFor="review">Review</label>
         <textarea
           name="review"
@@ -80,6 +86,7 @@ function Show() {
           cols="30"
           rows="10"
         ></textarea>
+        <button type="submit">Submit</button>
       </form>
     </div>
   );

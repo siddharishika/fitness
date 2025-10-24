@@ -33,7 +33,7 @@ function MyPrograms() {
   const handleDelete = async (program) => {
     try {
       let res = await axios.delete(
-        `http://localhost:8080/deleteprogram/${program._id}`,
+        `${API_BASE_URL}/deleteprogram/${program._id}`,
         { withCredentials: true }
       );
       fn(res);

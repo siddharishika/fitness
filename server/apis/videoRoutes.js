@@ -8,7 +8,7 @@ const { required } = require('joi');
 const multer=require('multer');
 const upload=multer({ dest:'files/'})
 const  fs = require('fs');
-const { isVideoAuthor, isLoggedIn } = require('../middleware');
+const { isVideoAuthor, isLoggedIn, isNotVideoAuthor, isNotCoach } = require('../middleware');
 const Program = require('../models/Program');
 
 router.get('/allvideos' , async(req,res)=>{
@@ -278,4 +278,23 @@ router.get("/test", (req, res) => {
 });
 
 
+
+router.patch("/addrating/:id", isLoggedIn, isNotVideoAuthor,isNotCoach, upload
+.none(), async (req, res) => {
+  try { 
+      let user = req.user;
+      let id = req.params.id;
+    let { userRating, newRating, newRatingCount } = req.body;
+    let found = await FitnessVideo.findById(id);
+
+    await FitnessVideo.findByIdAndUpdate(id, {
+      currentRating: newRating,
+      currentRatingCount: newRatingCount,
+        rating: [...found.rating, { userRating, user }],
+    });
+    res.status(201).json({ msg: "Gotcha" });
+  } catch (e) {
+    res.status(400).json({ msg: "Something went wrong..." });
+  }
+});
 module.exports=router;

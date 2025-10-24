@@ -32,7 +32,7 @@ function MyVideos() {
   }, []);
   const handleDelete = async (vid) => {
     try {
-      let res = await axios.delete(`http://localhost:8080/delete/${vid._id}`, {
+      let res = await axios.delete(`${API_BASE_URL}/delete/${vid._id}`, {
         withCredentials: true,
       });
 

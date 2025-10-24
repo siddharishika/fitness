@@ -33,7 +33,7 @@ function MyRecipes() {
   const handleDeleteRecipe = async (recipe) => {
     try {
       let res = await axios.delete(
-        `http://localhost:8080/deleterecipe/${recipe._id}`,
+        `${API_BASE_URL}/deleterecipe/${recipe._id}`,
         { withCredentials: true }
       );
       fn(res);
