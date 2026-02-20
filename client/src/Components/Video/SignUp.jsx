@@ -10,7 +10,7 @@ function SignUp() {
   const navigate = useNavigate();
   let nameRef = useRef("");
   let emailRef = useRef("");
-  let genderRef = useRef("");
+  const [gender, setGender] = useState("");
   // let roleRef1=useRef("");
   // let roleRef2=useRef("");
   let passwordRef = useRef("");
@@ -21,12 +21,12 @@ function SignUp() {
   const onOptionChange = (e) => {
     setRole(e.target.value);
   };
+  const onGenderChange = (e) => setGender(e.target.value);
   const handleSubmit = async (e) => {
     e.preventDefault();
     let form = document.querySelector("form");
     let formData = new FormData(form);
     let info = Object.fromEntries(formData);
-
     if (info.password != info.passwordc) {
       console.log("please enter same confirm password");
     } else {
@@ -59,7 +59,28 @@ function SignUp() {
         <label htmlFor="email">email:</label>
         <input type="email" ref={emailRef} name="email" required />
         <label htmlFor="gender">Gender:</label>
-        <input type="text" ref={genderRef} name="gender" required />
+        <label>
+          <input
+            type="radio"
+            name="gender"
+            value="Male"
+            checked={gender === "Male"}
+            onChange={onGenderChange}
+            required
+          />
+          Male
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="gender"
+            value="Female"
+            checked={gender === "Female"}
+            onChange={onGenderChange}
+            required
+          />
+          Female
+        </label>
         <label htmlFor="role-coach">Coach</label>
         <input
           type="radio"

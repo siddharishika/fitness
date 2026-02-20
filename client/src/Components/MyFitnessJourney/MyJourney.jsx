@@ -36,7 +36,9 @@ function MyJourney() {
   const handleUserLikedPrograms = (e) => {
     navigate("/likedprograms");
   };
-
+  const handleLikedRecipes = (e) => {
+    navigate("/likedrecipes");
+  }
   return (
     <div>
       <h1>My Journey</h1>
@@ -44,17 +46,17 @@ function MyJourney() {
       <button onClick={handleUserLikedVideos}>Liked Videos</button>
       <button onClick={handleUserLikedPrograms}>Liked Programs</button>
       {/* <button>Liked Programs</button> */}
-      <button>Liked Recipes</button>
-      {user &&
+      <button onClick={handleLikedRecipes} >Liked Recipes</button>
+      {/* {user &&
         user.likedVideos &&
         user.likedRecipes.map((vid, idx) => {
           return (
             <div>
               <div>{vid._id}</div>
               {/* <img src={vid.imgFileUrl} alt="" height="300" width="400"/> */}
-            </div>
-          );
-        })}
+            {/* </div> */}
+          {/* ); */}
+        {/* })} */} 
     </div>
   );
 }

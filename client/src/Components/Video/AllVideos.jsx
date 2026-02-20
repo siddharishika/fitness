@@ -54,14 +54,17 @@ function AllVideos() {
                   <Card.Text>
                     <i>Coach: {vid.coach && vid.coach.username}</i>
                     <br />
-                    Rating: {vid.rating == 0 && <div>No ratings yet</div>}
-                    {vid.rating > 0 && <div>{vid.rating}</div>}
+                    Rating: {program.currentRatingCount > 0 ? (
+                      <span>{program.currentRating}</span>
+                    ) : (
+                      <span>No ratings yet</span>
+                    )}
                   </Card.Text>
                 </Card.Body>
                 {/* <Card.Footer>
               <small className="text-muted">Last updated 3 mins ago</small>
             </Card.Footer> */}
-              </Card>
+            </Card>
             );
           })}
         </CardGroup>

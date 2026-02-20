@@ -8,22 +8,25 @@ import { Provider } from "react-redux";
 import store from "./store.js";
 import { Container, ThemeProvider } from "react-bootstrap";
 import Navigation from "./Components/Navigation.jsx";
+import { AuthProvider } from "./Components/Utils/AuthProvider";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-        {/* <ThemeProvider
-          breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
-          minBreakpoint="xxs"
-        > */}
+        <AuthProvider>
+          {/* <ThemeProvider
+            breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
+            minBreakpoint="xxs"
+          > */}
 
-        <div>
-          <Navigation />
-        </div>
-        <Container className="mt-3">
-          <App />
-        </Container>
-        {/* </ThemeProvider>; */}
+          <div>
+            <Navigation />
+          </div>
+          <Container className="mt-3">
+            <App />
+          </Container>
+          {/* </ThemeProvider>; */}
+        </AuthProvider>
       </BrowserRouter>
     </Provider>
   </React.StrictMode>

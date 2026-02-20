@@ -1,7 +1,8 @@
 const User = require('./models/User');
 const FitnessVideo = require('./models/videoModel');
 const {videoSchema} = require('./schema');
-
+const Program = require('./models/Program');
+const Recipe = require('./models/Recipe');
 //console.log(productSchema);
 const validateVideo=(req,res,next)=>{
     let {formData} =req.body;
@@ -100,15 +101,85 @@ const isNotVideoAuthor = async (req, res, next) => {
   let found = await FitnessVideo.findById(id);
   if (req.user._id.equals(found.coach)) {
     console.log("You are the author of this video, so cant review or rate");
+    res.status(200).send({
+      success: false,
+      message: "You are the author of this video, so cant review or rate",
+    });
+    return;
+  } else {
+      console.log("You are not author of this video");
+      next();
+
+  }
+};
+
+const isNotProgramAuthor = async (req, res, next) => {
+  let { id } = req.params;
+  let found = await Program.findById(id);
+  if (req.user._id.equals(found.coach)) {
+    console.log("You are the author of this program, so cant review or rate");
+    res.status(200).send({
+      success: false,
+      message: "You are the author of this program, so cant review or rate",
+    });
+    return;
+  } else {
+      console.log("You are not author of this program");
+      next();
+
+  }
+};
+const isProgramAuthor = async (req, res, next) => {
+  let { id } = req.params;
+  let found = await Program.findById(id);
+  if (req.user._id.equals(found.coach)) {
+    console.log("You are the author of this program");
+    next();
+  } else {
+      console.log("You are not author of this program");
+      res.status(200).send({
+      success: false,
+      message: "You are the NOT the author of this program, so cant edit or delete it",
+      });
+      return;
+
+  }
+};
+
+const isNotRecipeOwner = async (req, res, next) => {
+  let { id } = req.params;
+  let found = await Recipe.findById(id); 
+  console.log("Found recipe user", found.user); 
+  if (req.user._id.equals(found.user)) {
+    console.log("You are the author of this recipe");
+    res.status(200).send({
+        success: false,
+        message: "You are the author of this recipe"
+      });
+    return;
+  } else {
+      console.log("You are not author of this recipe");
+      next();  
+  }
+};  
+
+const isRecipeOwner = async (req, res, next) => {
+  let { id } = req.params;
+  let found = await Recipe.findById(id); 
+  console.log("Found recipe user", found.user); 
+  if (req.user._id.equals(found.user)) {
+    console.log("You are the author of this recipe");
     next();
   } else {
     res.status(200).send({
       success: false,
-      message: "You are not the author of this video",
+      message: "You are not the author of this recipe"
     });
-    return;
+    return; 
   }
-};
+};  
+
+
 module.exports = {
   validateVideo,
   isLoggedIn,
@@ -116,4 +187,8 @@ module.exports = {
   isVideoAuthor,
   isNotVideoAuthor,
   isNotCoach,
+  isNotProgramAuthor,
+  isProgramAuthor,
+  isNotRecipeOwner,
+  isRecipeOwner,
 };

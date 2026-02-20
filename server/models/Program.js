@@ -17,6 +17,16 @@ const programSchema = new mongoose.Schema(
    
        
       },
+    tags: [
+      {
+        type: String,
+
+        trim: true,
+
+        minLength: [3, "program tag must be more that 3 characters"],
+        maxLength: [30, "program tag must be at most 30 characters"],
+      },
+    ],
     typeOfProgram: [{
         type: String,
         required: [true, 'A video must have a name'],
@@ -25,7 +35,7 @@ const programSchema = new mongoose.Schema(
         minLength: [3, 'video name must be more that 3 characters'],
         maxLength: [30, 'video name must be at most 30 characters'],
       }],
-      equipment: [{
+    equipment: [{
         type: String,
         trim: true,
         unique: true,
@@ -67,26 +77,34 @@ const programSchema = new mongoose.Schema(
               },
             },
           ],
-          currentRating: {
+    currentRating: {
             type: Number,
             min: 0,
             max: 5,
             default: 0,
-          },
-          currentRatingCount: {
+    },
+    currentRatingCount: {
             type: Number,
             default: 0,
-          },
-      reviews:[{
-        review:{
-            type:String,
-            trim:true,
-        },
-        user:{
-            type: mongoose.Schema.ObjectId,
-            ref: 'User',
-        }
-      }]
+    },
+    reviews:[{
+      review:{
+        type:String,
+        trim:true,
+      },
+      user:{
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+      
+    },
+    {
+        timestamps: true,
+    },],
+    file: {
+      type: String,
+      default: "https://plus.unsplash.com/premium_photo-1670505060574-b08479270d1b?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
     // img: {
     //   type: String,
     //   required: [true, 'A song must have a cover img'],

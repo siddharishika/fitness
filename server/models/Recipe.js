@@ -4,76 +4,83 @@ const recipeSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'A video must have a name'],
+      required: [true, 'A recipe must have a name'],
       trim: true,
       unique: true,
-      minLength: [3, 'video name must be more that 3 characters'],
-      maxLength: [100, 'video name must be at most 30 characters'],
+      maxLength: [100, 'recipe name must be at most 100 characters'],
     },
-    rating:{
-        type: Number,
-        min: 0,
-        max: 5  
-    },
+    
     user: {
       type: mongoose.Schema.ObjectId,
       ref: 'User',
-      required: [true, 'A video must belong to an coach'],
+      required: [true, 'A recipe must belong to a user'],
     },
     ingredients: [{
         ingredient:{
         type: String,
-        required: [true, 'A video must have a name'],
+        required: [true, 'A recipe must have an ingredient name'],
         trim: true,
-        minLength: [3, 'video name must be more that 3 characters'],
-        maxLength: [300, 'video name must be at most 30 characters'],
+        maxLength: [1500, 'ingredient name must be at most 300 characters'],
       },
       amount:{
         type: String,
-        required: [true, 'A video must have a name'],
+        required: [true, 'A recipe must have an amount'],
         trim: true,
-   
-        minLength: [3, 'video name must be more that 3 characters'],
-        maxLength: [30, 'video name must be at most 30 characters'],
+        maxLength: [30, 'ingredient amount must be at most 30 characters'],
       }}],
       description: {
         type: String,
-        required: [true, 'A video must have a name'],
+        required: [true, 'A recipe must have a description'],
         trim: true,
 
-        minLength: [3, 'video name must be more that 3 characters'],
-        maxLength: [1000, 'video name must be at most 30 characters'],
+        maxLength: [1000, 'recipe description must be at most 1000 characters'],
       },
       process: [{
         type: String,
-        required: [true, 'A video must have a name'],
+        required: [true, 'A recipe must have a process'],
         trim: true,
-        unique: true,
-        minLength: [3, 'video name must be more that 3 characters'],
-        maxLength: [1000, 'video name must be at most 30 characters'],
+        maxLength: [1000, 'recipe process must be at most 1000 characters'],
       }],
       tags: [{
         type: String,
 
         trim: true,
-
-        minLength: [3, 'video name must be more that 3 characters'],
-        maxLength: [30, 'video name must be at most 30 characters'],
+        maxLength: [30, 'recipe tag must be at most 30 characters'],
       }],
       photo: {
         type: String,
         trim: true,
+        // use a direct image placeholder instead of an Unsplash page URL
+        default: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=1498&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       },
       timeRequired:{
         type: Number,
         min: 0,
     },
-    rating:{
-        type: Number,
-        min:0,
-        max:5,
-        default:0
-    }, 
+    rating: [
+                {
+                  userRating: {
+                    type: Number,
+                    min: 0,
+                    max: 5,
+                    default: 0,
+                  },
+                  user: {
+                    type: mongoose.Schema.ObjectId,
+                    ref: "User",
+                  },
+                },
+              ],
+    currentRating: {
+                type: Number,
+                min: 0,
+                max: 5,
+                default: 0,
+    },
+    currentRatingCount: {
+                type: Number,
+                default: 0,
+    },
     reviews:[{
         review:{
             type:String,
@@ -82,24 +89,16 @@ const recipeSchema = new mongoose.Schema(
         user:{
             type: mongoose.Schema.ObjectId,
             ref: 'User',
-        }
-      }]
-    
+        },
       
-    // img: {
-    //   type: String,
-    //   required: [true, 'A song must have a cover img'],
-    // },
-    // plays: {
-    //   type: Number,
-    //   default: 0,
-    // },
-   
+      },
+    {
+        timestamps: true,
+    },],
+
+
   },
-//   {
-//     toJSON: { virtuals: true },
-//     toObject: { virtuals: true },
-//   }
+
 );
 
 const Recipe =mongoose.model('Recipe', recipeSchema);

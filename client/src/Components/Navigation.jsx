@@ -4,19 +4,20 @@ import React from "react";
 import { Nav, Navbar } from "react-bootstrap";
 import { Container } from "react-bootstrap/";
 import { useNavigate } from "react-router-dom";
-
+import { useAuth } from './Utils/AuthProvider';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 function Navigation() {
   let navigate = useNavigate();
+  const { setUser } = useAuth();
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
       let res = await axios.get(`${API_BASE_URL}/logout`, {
         withCredentials: true,
       });
-
+      setUser(null);
       navigate("/login");
     } catch (e) {
       console.log(e, "Nahi ho payega");
@@ -36,7 +37,7 @@ function Navigation() {
   };
   const handleAllPrograms = (e) => {
     e.preventDefault();
-    navigate("/allprograms");
+    navigate("/allprograms/tags");
   };
   const handleAllRecipes = (e) => {
     e.preventDefault();
@@ -59,7 +60,7 @@ function Navigation() {
       className="bg-body-tertiary"
     >
       <Container>
-        <Navbar.Brand style={{ color: "rgb(209, 48, 75)" }} href="#home">
+        <Navbar.Brand style={{ color: "rgb(209, 48, 75)" }} href="/">
           Fitness Social
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />

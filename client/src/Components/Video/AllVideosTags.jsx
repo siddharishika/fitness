@@ -63,7 +63,7 @@ function AllVideosTags(tags) {
                       <br />
                       <i>Coach: {video.coach && video.coach.username}</i>
                       <br />
-                      Rating: {video.rating === 0 ? <Card.Text>No ratings yet</Card.Text> : <Card.Text>{video.rating}</Card.Text>}
+                      Rating: {video.currentRatingCount > 0 ? <span>{video.currentRating}</span> : <span>No ratings yet</span>}
                       <br />
                     </Card.Text>
                   </Card.Body>

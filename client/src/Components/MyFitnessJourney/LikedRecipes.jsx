@@ -33,7 +33,7 @@ function LikedVideos() {
   const handleRecipeShow = (recipe) => {
     navigate("/showrecipe", { state: recipe });
   };
-
+  console.log(data, "Liked Recipes Data");
   return (
     <div>
       <h1>My Liked Recipes</h1>
@@ -46,8 +46,8 @@ function LikedVideos() {
               <img src={recipe.photo} alt="" />
               <h5>
                 Ratings:
-                {recipe.rating == 0 && <div>No Ratings Yet</div>}
-                {recipe.rating > 0 && <div>{recipe.rating}</div>}
+                {recipe.currentRating == 0 && <div>No Ratings Yet</div>}
+                {recipe.currentRating > 0 && <div>{recipe.currentRating}</div>}
               </h5>
             </div>
           );

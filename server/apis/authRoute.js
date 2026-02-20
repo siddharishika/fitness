@@ -8,6 +8,7 @@ const multer=require('multer');
 const imagekit = require('../utils/imageKitCredentials');
 const upload=multer({ dest:'files/'})
 const fs=require('fs');
+const { isLoggedIn } = require('../middleware');
 
 
 router.post('/signup',upload.fields([
@@ -15,6 +16,7 @@ router.post('/signup',upload.fields([
    ])  ,async(req,res)=>{
     try{
         let file=req.files.profilePicture[0];
+        console.log("This is the file", file);
         fs.readFile(file.path, function(err, data) {
             if (err) throw err; // Fail if the file can't be read.
             imagekit.upload({
@@ -76,5 +78,10 @@ function(req, res) {
     });
 });
 
+router.get('/me', isLoggedIn,  (req, res) => {
+  const { _id, username, email, role, fileUrl } = req.user; 
+  console.log("User in /me:", _id);
+  res.json({ user: { _id, username, email, role, fileUrl } });
+});
 
 module.exports=router;

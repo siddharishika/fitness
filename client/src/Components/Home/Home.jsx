@@ -11,6 +11,7 @@ function Home() {
   let navigate = useNavigate();
 
   let imgRef = useRef("");
+  let programImageRef = useRef("");
 
   let [fitnessVideo, setVideo] = useState([]);
   // const history = useHistory();
@@ -26,6 +27,20 @@ function Home() {
   console.log("This is fitness video", fitnessVideo);
   const showVideo = (ele) => {
     navigate(`/show`, { state: ele });
+  };
+  let [programs, setPrograms] = useState([]);
+  useEffect(function () {
+    async function getProgram() {
+      let res = await axios.get(`${API_BASE_URL}/allprograms`, {
+        withCredentials: true,
+      });
+      // setVideo(res.data.data);
+      setPrograms(res.data.data);
+    }
+    getProgram();
+  }, []);
+  const showProgram = (program) => {
+    navigate(`/showprogram`, { state: program });
   };
 
   return (
@@ -54,8 +69,11 @@ function Home() {
                 <Card.Text>
                   <i>Coach: {vid.coach && vid.coach.username}</i>
                   <br />
-                  Rating: {vid.rating == 0 && <div>No ratings yet</div>}
-                  {vid.rating > 0 && <div>{vid.rating}</div>}
+                  Rating: {vid.currentRatingCount > 0 ? (
+                    <span>{vid.currentRating}</span>
+                  ) : (
+                    <span>No ratings yet</span>
+                  )}
                 </Card.Text>
               </Card.Body>
               {/* <Card.Footer>
@@ -65,32 +83,35 @@ function Home() {
           );
         })}
       </CardGroup>
-      <h2>Workout Videos</h2>
+      <h2>Workout Programs</h2>
       <br />
       <CardGroup>
-        {fitnessVideo && fitnessVideo.map(function (vid, idx) {
+        {programs && programs.map(function (program, idx) {
           return (
             <Card key={idx}>
               <Card.Img
                 variant="top"
-                onClick={(e) => showVideo(vid)}
-                ref={imgRef}
+                onClick={(e) => showProgram(program)}
+                ref={programImageRef}
                 key={idx}
-                p={vid._id}
-                src={vid.imgFileUrl}
-                alt=""
+                p={program._id}
+                src={program.file}
+                alt={program.file}
                 height="300"
                 width="400"
               />
               <Card.Body>
                 <Card.Title>
-                  <i>{vid.name}</i>
+                  <i>{program.name}</i>
                 </Card.Title>
                 <Card.Text>
-                  <i>Coach: {vid.coach && vid.coach.username}</i>
+                  <i>Coach: {program.coach && program.coach.username}</i>
                   <br />
-                  Rating: {vid.rating == 0 && <div>No ratings yet</div>}
-                  {vid.rating > 0 && <div>{vid.rating}</div>}
+                  Rating: {program.currentRatingCount > 0 ? (
+                    <span>{program.currentRating}</span>
+                  ) : (
+                    <span>No ratings yet</span>
+                  )}
                 </Card.Text>
               </Card.Body>
               {/* <Card.Footer>

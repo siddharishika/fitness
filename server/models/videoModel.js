@@ -95,21 +95,14 @@ const videoSchema = new mongoose.Schema(
           type: mongoose.Schema.ObjectId,
           ref: "User",
         },
-      },
+        
+      },{
+        timestamps: true,
+    },
     ],
-    // img: {
-    //   type: String,
-    //   required: [true, 'A song must have a cover img'],
-    // },
-    // plays: {
-    //   type: Number,
-    //   default: 0,
-    // },
+
   }
-  //   {
-  //     toJSON: { virtuals: true },
-  //     toObject: { virtuals: true },
-  //   }
+
 );
 
 const FitnessVideo =mongoose.model('FitnessVideo', videoSchema);

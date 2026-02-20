@@ -1,25 +1,25 @@
+import React, { createElement, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-
-import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-function AddRecipe() {
-  let [ingredients, setIngredients] = useState([]);
-  let [process, setProcess] = useState([]);
+function EditProgram() {
+  let location = useLocation();
+  let data = location.state;
+  let navigate = useNavigate();
+  let [ingredients, setIngredients] = useState(data.ingredients);
+  let [process, setProcess] = useState(data.process);
   let ingredientRef = useRef();
-  let amountRef = useRef();
   let processRef = useRef();
-  let [tags, setTags] = useState([]);
+  let [tags, setTags] = useState(data.tags);
   let tagRef = useRef();
   let timeRequiredRef = useRef();
   let nameRef = useRef();
   let descriptionRef = useRef();
   let photoRef = useRef();
-  let navigate = useNavigate();
-  function fn(res) {}
+
   const handleIngredients = (e) => {
     let arr = [...ingredients];
     let obj = {};
@@ -63,8 +63,9 @@ function AddRecipe() {
     data.name = nameRef.current.value;
     data.description = descriptionRef.current.value;
     data.photo = photoRef.current.value;
+
     try {
-      let res = await axios.post(`${API_BASE_URL}/addrecipe`, data, {
+      let res = await axios.post(`${API_BASE_URL}/recipe/edit`, data, {
         withCredentials: true,
       });
       if (
@@ -83,7 +84,7 @@ function AddRecipe() {
     <form method="POST">
       AddRecipe
       <label htmlFor="name">Name of Recipe</label>
-      <input type="text" ref={nameRef} />
+      <input type="text" ref={nameRef} defaultValue={data.name}/>
       <br />
       <label htmlFor="Ingredients">Ingredient</label>
       <input type="text" ref={ingredientRef} />
@@ -110,6 +111,7 @@ function AddRecipe() {
         cols="30"
         rows="10"
         ref={descriptionRef}
+        defaultValue={data.description}
       ></textarea>
       <br />
       <label htmlFor="process">Process</label>
@@ -144,10 +146,11 @@ function AddRecipe() {
         cols="30"
         rows="10"
         ref={photoRef}
+        defaultValue={data.photo}
       ></textarea>
       <br />
       <label htmlFor="timeRequired">Time Required for Cooking</label>
-      <input type="number" ref={timeRequiredRef} />
+      <input type="number" ref={timeRequiredRef} defaultValue={data.timeRequired} />
       <button type="submit" onClick={handleSubmit}>
         Add Recipe
       </button>
@@ -155,4 +158,4 @@ function AddRecipe() {
   );
 }
 
-export default AddRecipe;
+export default EditProgram;

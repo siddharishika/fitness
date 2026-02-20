@@ -27,6 +27,8 @@ import LikedRecipes from "./Components/MyFitnessJourney/LikedRecipes";
 import MyPrograms from "./Components/MyFitnessJourney/MyPrograms";
 import MyRecipes from "./Components/MyFitnessJourney/MyRecipes";
 import Home from "./Components/Home/Home";
+import AllProgramsTags from "./Components/Program/AllProgramsTags";
+import RequireAuth from "./Components/Utils/RequireAuth";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 function App() {
@@ -80,8 +82,9 @@ function App() {
         <Route path="/edit" element={<EditVideo />} />
         <Route path="/addprogram" element={<AddProgram tags={tags} />} />
         <Route path="/allprograms" element={<AllPrograms />} />
+        <Route path="/allprograms/tags" element={<AllProgramsTags tags={tags} />} />
         <Route path="/showprogram" element={<ShowProgram />} />
-        <Route path="/editprogram" element={<EditProgram />} />
+        <Route path="/program/edit" element={<RequireAuth><EditProgram /></RequireAuth>} />
         <Route path="/addrecipe" element={<AddRecipe />} />
         <Route path="/allrecipes" element={<AllRecipes />} />
         <Route path="/showrecipe" element={<ShowRecipe />} />
@@ -92,6 +95,7 @@ function App() {
         <Route path="/likedrecipes" element={<LikedRecipes />} />
         <Route path="/myprograms" element={<MyPrograms />} />
         <Route path="/myrecipes" element={<MyRecipes />} />
+        <Route path='/recipe/edit' element={<RequireAuth><AddRecipe isEdit={true} /></RequireAuth>} />
       </Routes>
     </div>
   );

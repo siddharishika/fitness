@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express =require('express');
 const app=express();
 const path=require('path');
@@ -5,12 +6,12 @@ const mongoose=require('mongoose');
 const methodOverride = require('method-override')
 const cors = require('cors')
 const multer=require('multer');
-const dotenv=require('dotenv').config();
 const uploadRoutes=require('./apis/uploadRoute');
 const bodyParser = require('body-parser');
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const sharp=require('sharp');
 const ImageKit = require('imagekit');
+const imagekitAuth = require('./utils/imageKitCredentials');
 const LocalStrategy =require('passport-local');
 const passport = require('passport');
 
@@ -21,7 +22,6 @@ const session = require('express-session');
 const uri = process.env.MONGO_URI;
 const PORT = process.env.PORT || 8080;
 
-const imageKitAuth = require('./utils/imageKit');
 const videoRoutes=require('./apis/videoRoutes')
 const authRoutes=require('./apis/authRoute');
 const programRoutes=require('./apis/programRoutes');
@@ -38,7 +38,7 @@ app.use(function(req, res, next) {
     next();
   });
 
-// app.use(imageKitAuth);
+
 
 app.use(methodOverride('_method'));
 
@@ -98,7 +98,6 @@ app.use(authRoutes);
 app.use(programRoutes);
 app.use(recipeRoutes);
 app.use(myJourneyRoutes);
-
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
 });
