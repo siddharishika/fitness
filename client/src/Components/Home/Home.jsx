@@ -1,5 +1,6 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from 'axios';
- 
+import { faStar } from '@fortawesome/free-solid-svg-icons'
 import React, { useEffect, useRef, useState } from "react";
 import { Card, CardGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
@@ -47,10 +48,10 @@ function Home() {
     <div>
       <h2>Workout Videos</h2>
       <br />
-      <CardGroup>
+        <CardGroup style={{}} >
         {fitnessVideo && fitnessVideo.map(function (vid, idx) {
           return (
-            <Card key={idx}>
+            <Card key={idx} style={{ padding: '10px', border: "2px solid #A7C7E7" ,borderRadius: "10px"  }}>  
               <Card.Img
                 variant="top"
                 onClick={(e) => showVideo(vid)}
@@ -61,18 +62,20 @@ function Home() {
                 alt=""
                 height="300"
                 width="400"
+                style={{  padding: '10px', }}
               />
               <Card.Body>
                 <Card.Title>
-                  <i>{vid.name}</i>
+                  <i>{vid.name} by {vid.coach && vid.coach.username}</i>
                 </Card.Title>
                 <Card.Text>
-                  <i>Coach: {vid.coach && vid.coach.username}</i>
-                  <br />
-                  Rating: {vid.currentRatingCount > 0 ? (
-                    <span>{vid.currentRating}</span>
+                  {vid.currentRatingCount > 0 ? (
+                    <span>
+                      {vid.currentRating}
+                      <FontAwesomeIcon icon={faStar} style={{color: "rgb(255, 212, 59)", width: "20px", height: "20px"}} />
+                    </span>
                   ) : (
-                    <span>No ratings yet</span>
+                    <i>No ratings yet</i>
                   )}
                 </Card.Text>
               </Card.Body>
@@ -83,12 +86,14 @@ function Home() {
           );
         })}
       </CardGroup>
+      <br />
+      <br />
       <h2>Workout Programs</h2>
       <br />
-      <CardGroup>
+      <CardGroup style={{}} >
         {programs && programs.map(function (program, idx) {
           return (
-            <Card key={idx}>
+            <Card key={idx} style={{  padding: '10px', border: "2px solid #A7C7E7" ,borderRadius: "10px" }}>
               <Card.Img
                 variant="top"
                 onClick={(e) => showProgram(program)}
@@ -99,20 +104,25 @@ function Home() {
                 alt={program.file}
                 height="300"
                 width="400"
+                style={{ padding: '10px' }}
               />
               <Card.Body>
                 <Card.Title>
-                  <i>{program.name}</i>
+                  <i>{program.name} by {program.coach && program.coach.username}</i>
                 </Card.Title>
                 <Card.Text>
-                  <i>Coach: {program.coach && program.coach.username}</i>
-                  <br />
-                  Rating: {program.currentRatingCount > 0 ? (
-                    <span>{program.currentRating}</span>
+                  {program.currentRatingCount > 0 ? (
+                    <span>
+                      {program.currentRating}
+                      <FontAwesomeIcon icon={faStar} style={{color: "rgb(255, 212, 59)", width: "20px", height: "20px"}} />
+                    </span>
+                    
                   ) : (
-                    <span>No ratings yet</span>
+                    <i>No ratings yet</i>
                   )}
+                  
                 </Card.Text>
+
               </Card.Body>
               {/* <Card.Footer>
                   <small className="text-muted">Last updated 3 mins ago</small>

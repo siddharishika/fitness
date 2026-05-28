@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import StarRatings from "react-star-ratings";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Button } from "react-bootstrap";
 export default function Rating(props) {
     const API_BASE_URL =
       import.meta.env.VITE_API_BASE_URL || window.location.origin;
@@ -57,7 +58,7 @@ export default function Rating(props) {
         starDimension="40px"
         starSpacing="15px"
       />
-      <button type="submit">Post Rating</button>
+      <Button variant="light" style={{border: "2px solid black"}} type="submit">Post Rating</Button>
     </form>
   );
 }

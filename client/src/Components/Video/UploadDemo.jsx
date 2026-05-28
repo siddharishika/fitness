@@ -1,18 +1,18 @@
 import axios from 'axios';
- 
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Button,
   ButtonGroup,
   Col,
   Container,
+  Form,
   ListGroup,
   Row,
   ToggleButton,
 } from "react-bootstrap";
-import { IconContext } from "react-icons";
-import { IoAddOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import TagAdder from "../Utils/TagAdder";
+
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
@@ -28,15 +28,10 @@ function UploadDemo(props) {
   let tagsContainerRef = useRef();
   // tags=tags.tags || [];
   let [tagsList, setTagsList] = useState({});
-  const [tags, setVideoTags] = useState(props.tags); // Example tags
+  const [tags, setVideoTags] = useState(props.tags); 
   const [selectedTags, setSelectedTags] = useState([]);
-  // useEffect(() => {
-  //     let tagsObj = {};
-  //     for (const tag of tags) {
-  //         tagsObj[tag] = false;
-  //     }
-  //     setTagsList(tagsObj);
-  // }, [tags]);
+
+
   const handlePlus = (e) => {
     e.preventDefault();
     arr = [...arr, tagRef.current.value];
@@ -96,42 +91,41 @@ function UploadDemo(props) {
     }
   };
   return (
-    <div>
-      <form onSubmit={handleSubmit} encType="multipart/form-data" method="POST">
-        <label htmlFor="name">Video Title:</label>
-        <input type="text" name="name" />
-        <label htmlFor="tags">Tags:</label>
-        <TagAdder tags={tags} onTagsChange={handleTagsChange} />
-        <IconContext.Provider
-          value={{ color: "black", className: "global-class-name" }}
-        >
-          <div className="plus">
-            <IoAddOutline onClick={handlePlus} />
-          </div>
-        </IconContext.Provider>
+    <div className='mx-auto'> 
+      <Container className="p-4 border rounded">
+      <Form onSubmit={handleSubmit} encType="multipart/form-data" method="POST">
+      {/* <form onSubmit={handleSubmit} encType="multipart/form-data" method="POST"> */}
+        <div className="text-center mb-4">
+          <h2>Upload Video</h2>
+          <p>Upload your first video as a coach!</p>
+        </div>
+        <Form.Group className="mb-3" controlId="formGridTitle">
+          <Form.Label>Video Title</Form.Label>
+          <Form.Control type="text" placeholder="Enter video title" name="name" />
+        </Form.Group>
+        
+        <TagAdder tags={tags} onTagsChange={handleTagsChange}  />
         <ul ref={tagsContainerRef}>
           {arr && arr.map(function (ele, idx) {
             return <li key={idx}>{ele}</li>;
           })}
         </ul>
-        <label htmlFor="file">Video File</label>
-        <input
-          name="file"
-          type="file"
-          ref={fileRef}
-          onChange={handleFileChange}
-          accept="video/*"
-        />
-        <label htmlFor="imgFile">Image File</label>
-        <input
-          name="imgFile"
-          type="file"
-          ref={fileRef}
-          onChange={handleFileChange2}
-          accept="image/*"
-        />
-        <button type="submit">Submit</button>
-      </form>
+        <Form.Group controlId="formFileLg" className="mb-3">
+          <Form.Label>Video File</Form.Label>
+          <Form.Control type="file" name='file' ref={fileRef} onChange={handleFileChange} size="lg" />
+        </Form.Group>
+        <Form.Group controlId="formFileLg" className="mb-3">
+          <Form.Label>Image File</Form.Label>
+          <Form.Control type="file" name='imgFile' ref={fileRef} onChange={handleFileChange2} size="lg" />
+        </Form.Group>
+
+        <Button variant="primary" type="submit" className='w-100'>
+        Submit
+        </Button>
+        {/* <button type="submit">Submit</button> */}
+      {/* </form> */}
+      </Form>
+      </Container>
     </div>
   );
 }

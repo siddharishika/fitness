@@ -12,21 +12,12 @@ import {
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-function TagAdder({ tags: initialTags = [], onTagsChange }) {
+function TagAdderEdit({ tags: initialTags = [], onTagsChange, selectedTagsChecked }) {
   const [tags, setTags] = useState(initialTags);
   const tagInputRef = useRef();
-  const [checked, setChecked] = useState({});
+  const [checked, setChecked] = useState(selectedTagsChecked || {});
   const [finalTags, setFinalTags] = useState([]);
-
-  // Only initialize once on mount
-  useEffect(() => {
-    setTags(initialTags);
-    const checkedObj = {};
-    initialTags.forEach((tag) => {
-      checkedObj[tag] = false;
-    });
-    setChecked(checkedObj);
-  }, []); // <-- Only on mount
+  console.log("Selected Tags in TagAdderEdit:", checked);
 
   // Update finalTags whenever checked or tags change
   useEffect(() => {
@@ -57,8 +48,6 @@ function TagAdder({ tags: initialTags = [], onTagsChange }) {
 
   return (
     <div>
-      {/* <input type="text" ref={tagInputRef} placeholder="Enter tag" />
-      <IoAddOutline onClick={handleAddTag} style={{ cursor: "pointer" }} /> */}
       <Container>
         <label htmlFor="tags">Tags:</label>
         {chunkArray(tags, Math.ceil(tags.length / 5)).map((rowTags, rowIdx) => (
@@ -105,4 +94,4 @@ function TagAdder({ tags: initialTags = [], onTagsChange }) {
   );
 }
 
-export default TagAdder;
+export default TagAdderEdit;

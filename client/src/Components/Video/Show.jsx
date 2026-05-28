@@ -1,11 +1,13 @@
 import axios from 'axios';
-import { IKVideo } from 'imagekitio-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faStar } from '@fortawesome/free-solid-svg-icons'
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Rating from '../Utils/Rating';
 import VideoPlayer from '../Utils/VideoPlayer';
 import { useAuth } from '../Utils/AuthProvider';
 import { useRef } from 'react';
+import { Button, Card, Form, InputGroup } from 'react-bootstrap';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
@@ -31,7 +33,7 @@ function Show() {
           withCredentials: true,
         });
         // setVid(res.data.data);
-        let { name, fileUrl, coach, _id, rating, reviews, currentRating, currentRatingCount} = res.data.data;
+        let { name, fileUrl, coach, _id, rating, reviews, currentRating, tags, currentRatingCount} = res.data.data;
         let { username, _id: coachId } = coach || {};
         // store coach id so we can check ownership on client
         setVid({
@@ -39,6 +41,7 @@ function Show() {
           username,
           fileUrl,
           _id,
+          tags,
           coachId,
           rating,
           reviews,
@@ -116,47 +119,66 @@ function Show() {
   const isOwner = user && vid.coachId && String(user._id) === String(vid.coachId);
   console.log("Rating in show:", newrating);
   return (
-    <div>
-      <h1>{vid.name}</h1>
-      <VideoPlayer url={vid.fileUrl} />
-      <h3>Coach: {vid.username}</h3>
-      <h3>Current Rating: {vid.currentRating}</h3>
-      <button onClick={handleVideoLike}>Add to likes</button>
-      {isOwner && (
+    <>
+      <div style={{
+        backgroundColor: "#A7C7E7",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: -1
+      }} />
+      <div className='mx-auto p-4 rounded' style={{ position: "relative", zIndex: 1 }}>
+        <h1>{vid.name} by {vid.username}</h1>
+        <Card style={{padding: "20px"}}>
+          <VideoPlayer url={vid.fileUrl}  />
+          <span style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px" }}>
+            <i>{vid.currentRating}</i>
+            <FontAwesomeIcon icon={faStar} style={{color: "rgb(255, 212, 59)", width: "20px", height: "20px"}} />
+            <Button variant="light" style={{ border:"2px solid black" }}  onClick={handleVideoLike}>Add to likes</Button>
+            {isOwner && (
+              <>
+                <Button variant="light" style={{ border:"2px solid black" }} onClick={handleEditVideo}>Edit Video</Button>
+                <Button variant='light'style={{ border:"2px solid red" }} onClick={handleVideoDelete}>Delete Video</Button>
+              </>
+            )}
+          </span>
+        </Card>
+        <br />
+        <br />
+        {!isOwner && <>
+          <h3><i>Rate this video</i></h3>
+          <Rating videoId={vid._id} currentRating={vid.currentRating} currentRatingCount={vid.currentRatingCount} isVideo={true} />
+          <br />
+          <br />
+          <Form onSubmit={handleReviewSubmit} className="p-4 border rounded"  method="POST">
+            <Form.Label><h3><i>Leave a review</i></h3></Form.Label>
+            <InputGroup style={{padding: "10px"}} >
+              <Form.Control as="textarea" aria-label="With textarea" placeholder="Enter your review here" name="review" ref={reviewRef} />
+            </InputGroup>
+            <Button type="submit" variant='light' style={{border: "2px solid black"}} className='w-100' >Submit</Button>
+          </Form>
+        </>}
         <>
-          <button onClick={handleEditVideo}>Edit Video</button>
-          <button onClick={handleVideoDelete}>Delete Video</button>
+          <br />
+          <br />
+          <h2><i>Comments</i></h2>
+          {vid && vid.reviews && vid.reviews.map((rev, i) => {
+            return (
+              <>
+                <Card key={i} style={{padding:"5px", border: "1px solid black" }} >
+                  <Card.Text> <strong><i>{rev.user.username}</i></strong></Card.Text>
+                  <Card.Title>{rev.review}</Card.Title>
+                </Card>
+                <br />
+                <br />
+              </>
+            );
+          })}
         </>
-      )}
-      {!isOwner && <>
-      <h3>Rate this video</h3>
-      <Rating videoId={vid._id} currentRating={vid.currentRating} currentRatingCount={vid.currentRatingCount} isVideo={true} />
-      <br />
-      <br />
-      <form onSubmit={handleReviewSubmit} method="POST">
-        <label htmlFor="review">Review</label>
-        <textarea
-          name="review"
-          id=""
-          placeholder="Enter your review here"
-          cols="30"
-          rows="10"
-          ref={reviewRef}
-        ></textarea>
-        <button type="submit">Submit</button>
-      </form>
-      </>}
-      <>
-      {vid && vid.reviews && vid.reviews.map((rev, i) => {
-        return (
-          <div key={i}>
-            <h4>{rev.user.username}</h4>
-            <p>{rev.review}</p>
-          </div>
-        );
-      })}
-      </>
-    </div>
+      </div>
+    </>
   );
 }
 

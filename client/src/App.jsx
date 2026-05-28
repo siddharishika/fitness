@@ -62,42 +62,53 @@ function App() {
 
   // authenticator();
   return (
-    <div className="App">
-      {/* <p>To use this funtionality please remember to setup the server</p> */}
+    <>
+      <div style={{
+        backgroundColor: "#A7C7E7",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: -1
+      }} />
+      <div className="App" style={{ position: "relative", zIndex: 1 }}>
+        {/* <p>To use this funtionality please remember to setup the server</p> */}
 
-      {/* <IKUpload fileName={name} tags={["tag1"]} useUniqueFileName={true} isPrivateFile= {false} /> */}
-      {/* <Upload /> */}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/workoutvideos" element={<AllVideos />} />
-        {/* <Route path='/new' element={<Upload />}/> */}
-        <Route
-          path="/workoutvideos/tags"
-          element={<AllVideosTags tags={tags} />}
-        />
-        <Route path="/new" element={<UploadDemo tags={tags} />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/show" element={<Show />} />
-        <Route path="/edit" element={<EditVideo />} />
-        <Route path="/addprogram" element={<AddProgram tags={tags} />} />
-        <Route path="/allprograms" element={<AllPrograms />} />
-        <Route path="/allprograms/tags" element={<AllProgramsTags tags={tags} />} />
-        <Route path="/showprogram" element={<ShowProgram />} />
-        <Route path="/program/edit" element={<RequireAuth><EditProgram /></RequireAuth>} />
-        <Route path="/addrecipe" element={<AddRecipe />} />
-        <Route path="/allrecipes" element={<AllRecipes />} />
-        <Route path="/showrecipe" element={<ShowRecipe />} />
-        <Route path="/myjourney" element={<MyJourney />} />
-        <Route path="/likedvideos" element={<LikedVideos />} />
-        <Route path="/myvideos" element={<MyVideos />} />
-        <Route path="/likedprograms" element={<LikedPrograms />} />
-        <Route path="/likedrecipes" element={<LikedRecipes />} />
-        <Route path="/myprograms" element={<MyPrograms />} />
-        <Route path="/myrecipes" element={<MyRecipes />} />
-        <Route path='/recipe/edit' element={<RequireAuth><AddRecipe isEdit={true} /></RequireAuth>} />
-      </Routes>
-    </div>
+        {/* <IKUpload fileName={name} tags={["tag1"]} useUniqueFileName={true} isPrivateFile= {false} /> */}
+        {/* <Upload /> */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/workoutvideos" element={<AllVideos />} />
+          {/* <Route path='/new' element={<Upload />}/> */}
+          <Route
+            path="/workoutvideos/tags"
+            element={<AllVideosTags tags={tags} />}
+          />
+          <Route path="/new" element={<UploadDemo tags={tags} />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/show" element={<Show />} />
+          <Route path="/edit" element={<EditVideo tags={tags}/>} />
+          <Route path="/addprogram" element={<AddProgram tags={tags} />} />
+          <Route path="/allprograms" element={<AllPrograms />} />
+          <Route path="/allprograms/tags" element={<AllProgramsTags tags={tags} />} />
+          <Route path="/showprogram" element={<ShowProgram />} />
+          <Route path="/program/edit" element={<RequireAuth><EditProgram /></RequireAuth>} />
+          <Route path="/addrecipe" element={<AddRecipe />} />
+          <Route path="/allrecipes" element={<AllRecipes />} />
+          <Route path="/showrecipe" element={<ShowRecipe />} />
+          <Route path="/myjourney" element={<MyJourney />} />
+          <Route path="/likedvideos" element={<LikedVideos />} />
+          <Route path="/myvideos" element={<MyVideos />} />
+          <Route path="/likedprograms" element={<LikedPrograms />} />
+          <Route path="/likedrecipes" element={<LikedRecipes />} />
+          <Route path="/myprograms" element={<MyPrograms />} />
+          <Route path="/myrecipes" element={<MyRecipes />} />
+          <Route path='/recipe/edit' element={<RequireAuth><AddRecipe isEdit={true} /></RequireAuth>} />
+        </Routes>
+      </div>
+    </>
   );
 }
 

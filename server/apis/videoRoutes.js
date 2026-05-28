@@ -28,7 +28,7 @@ router.get('/allvideos' , async(req,res)=>{
 router.get('/show/:data', async(req,res)=>{
     try {
         let data=req.params.data;
-        let fitnessVideos=await FitnessVideo.findById(data).populate('coach');
+        let fitnessVideos=await FitnessVideo.findById(data).populate('coach').populate('reviews.user');
         res.status(201).json({msg: "Gotcha" , data:fitnessVideos});
     } catch (e) {
         res.status(400).json({msg: "Something went wrong..." });

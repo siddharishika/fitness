@@ -1,16 +1,19 @@
 import axios from 'axios';
  
 import React, { useEffect, useRef, useState } from "react";
+import { Button, Container, Form } from 'react-bootstrap';
 import { IconContext } from 'react-icons';
 import { IoAddOutline, IoRemoveCircleOutline } from 'react-icons/io5';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import TagAdder from '../Utils/TagAdder';
+import TagAdderEdit from '../Utils/TagAdderEdit';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 var file={};
 var imgFile={};
 // var arr=[];
 var arr2=[];
-function EditVideo() {
+function EditVideo(props) {
    let containerRef=useRef();
     let location=useLocation();
     let data=location.state;
@@ -18,25 +21,17 @@ function EditVideo() {
     let imgFileRef=useRef();
     let tagRef=useRef();
     let navigate=useNavigate();
-
+    let [tagsList, setTagsList] = useState({});
+    let [selectedTags, setSelectedTags] = useState(data.tags || [] );
+    let [selectedTagsChecked, setSelectedTagsChecked] = useState({});
     let [vid , setVid]=useState({_id:"", name:"",fileId:"", fileUrl:""
     , filePath:"", imgFileId:"",imgFilePath:"",imgFileUrl:"" , tags:[],coach:{}});
-    const params=useParams();
-    let [arr,setArr]=useState([]);
-    
-    useEffect(function (){
-        async function getVideo(){
-            let res = await axios.get(`${API_BASE_URL}/show/${data}`  ,{withCredentials: true});
-            // setVid(res.data.data);
-            let {_id, name,fileId, fileUrl, filePath, imgFileId,imgFilePath,imgFileUrl , coach,tags}=res.data.data;
-            let {username}=coach;
-            setVid({_id,name,fileId, fileUrl, filePath, imgFileId,imgFilePath,imgFileUrl ,tags, coach})
-            // arr=tags;
-            setArr(tags);
-            
-        }
-        getVideo();
-    } , [params])
+    const [tags, setVideoTags] = useState(props.tags);
+      useEffect(() => {
+      props.tags.forEach((tag) => {
+        setSelectedTagsChecked((prev) => ({ ...prev, [tag]: data.tags.includes(tag) }));
+      });
+    }, [props.tags, selectedTags]);
     let x=vid.tags;
     let nameRef=useRef(vid.name);
     // setArr(x);
@@ -48,17 +43,16 @@ function EditVideo() {
     }
     const handleSubmit=async(e)=>{
         e.preventDefault();
+        arr = [...arr, ...Object.keys(tagsList).filter((tag) => tagsList[tag])];
         let f=fileRef.current.value;
         let imgf=imgFileRef.current.value;
-        let b1=arr==vid.tags;
-        let b2=nameRef.current.value==vid.name;
+        let b1=arr==data.tags;
+        let b2=nameRef.current.value==data.name;
         if(f || imgf || !b1 || !b2){
             try{
                 let form=document.querySelector("form");
-                
-                
                 let formData=new FormData(form);
-                formData.append('tags' , arr);
+                formData.append('tags' , arr.join(","));
                 formData.append('id' , vid._id);
                 // let x=formData.get('file');
                 // formData.append("file",file);
@@ -108,42 +102,11 @@ function EditVideo() {
         }
         
     }
-    const handlePlus=(e)=>{
-        e.preventDefault();
-        arr2=[...arr,tagRef.current.value]
-        setArr(arr2);
-        // arr=[...arr,tagRef.current.value]
-        // let li=document.createElement('li');
-        // let div=document.createElement('div')
-        // let minus=document.createElement('div')
-        // div.appendChild(li);
-        // div.appendChild(minus);
-        // minus.innerHTML="-"
-        // let l=arr.length-1;
-        // minus.id="child"+l;
-        
-        // li.innerHTML=tagRef.current.value;
-        // div.id=arr.length-1;
-        // containerRef.current.appendChild(div);
-       
-        
-        // // minus.onClick=(e)=>handleMinus(e);
-        // minus.setAttribute('onClick' , "handleMinus()");
-    }
-    const handleMinus=(e)=>{
-        e.preventDefault();
-        let array=[];
-        arr.map((tag,index)=>{
 
-            if(idx!=index){
-                array.push(tag)
-            }
-        })
-        // arr=array;
-        setArr(array);
-    }
-    
-    
+    const handleTagsChange = (tags) => {
+    setSelectedTags(tags);
+    console.log("Selected Tags:", tags);
+  };
     const handleFileChange=(e)=>{
         file=e.target.files[0];
         
@@ -155,52 +118,45 @@ function EditVideo() {
     
   return (
     <div>
-        <form  onSubmit={handleSubmit} encType="multipart/form-data" method='POST'>
-        <label htmlFor="name">
-            Video Title: 
-        </label>
-        <input ref={nameRef} defaultValue={vid.name} type="text" placeholder='Video Title' id='name' name="name" required/>
-        <label htmlFor="tag"></label>
-        <input type="text" ref={tagRef} />
-        {/* <IconContext.Provider value={{ color: "black", className: "global-class-name" }}>
-          
-          <div className='plus' >
-            <IoAddOutline id='plus' onClick={handlePlus} />
+      <div className='mx-auto'> 
+            <Container className="p-4 border rounded">
+            <Form onSubmit={handleSubmit} encType="multipart/form-data" method="POST">
+            {/* <form onSubmit={handleSubmit} encType="multipart/form-data" method="POST"> */}
+              <div className="text-center mb-4">
+                <h2>Edit your video here!</h2>
+              </div>
+              <Form.Group className="mb-3" controlId="formGridTitle">
+                <Form.Label>Video Title</Form.Label>
+                <Form.Control type="text" placeholder="Enter video title" name="name" ref={nameRef} defaultValue={data.name} required/>
+              </Form.Group>
+              <TagAdderEdit tags={tags} onTagsChange={handleTagsChange} selectedTagsChecked={selectedTagsChecked} />
+              {/* <ul >
+                {selectedTags && selectedTags.map(function (ele, idx) {
+                  return <li key={idx}>{ele}</li>;
+                })}
+              </ul> */}
+              {/* <TagAdder tags={tags} onTagsChange={handleTagsChange} /> */}
+              {/* <ul ref={tagRef}>
+                {arr && arr.map(function (ele, idx) {
+                  return <li key={idx}>{ele}</li>;
+                })}
+              </ul> */}
+              <Form.Group controlId="formFileLg" className="mb-3">
+                <Form.Label>If you want to change video, please select video</Form.Label>
+                <Form.Control type="file" name='file'  ref={fileRef}  onChange={handleFileChange} accept="video/*" size="lg" />
+              </Form.Group>
+              <Form.Group controlId="formFileLg" className="mb-3">
+                <Form.Label>If you want to change image, please select image</Form.Label>
+                <Form.Control type="file" name='imgFile' ref={imgFileRef} onChange={handleFileChange2} accept="image/*" size="lg" />
+              </Form.Group>
+              <Button variant="primary" type="submit" className='w-100'>
+              Submit
+              </Button>
+              {/* <button type="submit">Submit</button> */}
+            {/* </form> */}
+            </Form>
+            </Container>
           </div>
-         
-        </IconContext.Provider> */}
-        <div onClick={handlePlus}>+</div>
-        <ul ref={containerRef} id='container'>
-          {
-            arr && arr.map((tag,idx)=>{
-                return (
-                    // <div id={idx} >
-                    <div key={idx}>
-                        <li  >{tag}</li>
-                        <div onClick={handleMinus}>-</div>
-                    </div>
-                    // {/* <div id={"child"+idx} onClick={handleMinus} >-</div> */}
-                    // </div>
-                )
-            })
-          }
-          
-        </ul>
-        
-        {/* <IKImage  onClick={showVideo}  p={vid._id} path={vid.imgFilePath} transformation={[{ height: 300, width: 400 }]} 
-          loading="lazy" height="300" width="400" /> */}
-          <b>If you want to change video, please select video</b>
-          <br />
-        <label htmlFor="file">Video File</label>
-        <input name='file' type="file"  ref={fileRef}  onChange={handleFileChange} accept="video/*"/>
-        <br />
-        <b>If you want to change image, please select image</b>
-        <br />
-        <label htmlFor="imgFile">Image File</label>
-        <input name='imgFile' type="file"  ref={imgFileRef} onChange={handleFileChange2} accept="image/*"/>
-        <br />
-        <button type="submit">Edit</button>
-      </form>
     </div>
   )
 }

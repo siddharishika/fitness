@@ -11,23 +11,28 @@ import Navigation from "./Components/Navigation.jsx";
 import { AuthProvider } from "./Components/Utils/AuthProvider";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
-        <AuthProvider>
-          {/* <ThemeProvider
-            breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
-            minBreakpoint="xxs"
-          > */}
+    <ThemeProvider
+    breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
+    minBreakpoint="xxs"
+    >
+      <Provider store={store}>
+        <BrowserRouter>
+          <AuthProvider>
+            {/* <ThemeProvider
+              breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
+              minBreakpoint="xxs"
+            > */}
 
-          <div>
-            <Navigation />
-          </div>
-          <Container className="mt-3">
-            <App />
-          </Container>
-          {/* </ThemeProvider>; */}
-        </AuthProvider>
-      </BrowserRouter>
-    </Provider>
+            <div>
+              <Navigation />
+            </div>
+            <Container className="mt-3">
+              <App />
+            </Container>
+            {/* </ThemeProvider>; */}
+          </AuthProvider>
+        </BrowserRouter>
+      </Provider>
+    </ThemeProvider>
   </React.StrictMode>
 );

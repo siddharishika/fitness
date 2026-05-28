@@ -1,7 +1,8 @@
 import axios from 'axios';
  
 import React, { useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Col, Container, Form, Row, Button } from 'react-bootstrap';
+import {  Link, useNavigate } from "react-router-dom";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
@@ -19,9 +20,13 @@ function SignUp() {
   let profilePictureRef = useRef("");
   var [profilePicture, setProfilePicture] = useState();
   const onOptionChange = (e) => {
-    setRole(e.target.value);
+    setRole(e.target.id);
+    console.log(e.target.id);
   };
-  const onGenderChange = (e) => setGender(e.target.value);
+  const onGenderChange = (e) => {
+    setGender(e.target.id);
+    // console.log(e.target.id);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     let form = document.querySelector("form");
@@ -47,19 +52,55 @@ function SignUp() {
   };
 
   return (
-    <div>
-      <form
-        action="submit"
+    <div className='mx-auto'> 
+      <Container className="p-4 border rounded">
+      
+      <Form
         onSubmit={handleSubmit}
         encType="multipart/form-data"
         method="POST"
       >
-        <label htmlFor="username">Username:</label>
-        <input type="text" name="username" ref={nameRef} required />
-        <label htmlFor="email">email:</label>
-        <input type="email" ref={emailRef} name="email" required />
-        <label htmlFor="gender">Gender:</label>
-        <label>
+        <div className="text-center mb-4">
+          <h2>Sign Up</h2>
+          <p>Create your account to get started!</p>
+        </div>
+        {/* <label htmlFor="name">Name:</label>
+        <input type="text" name="name" ref={nameRef} required /> */}
+        <Form.Group className="mb-3" controlId="formGridUsername">
+          <Form.Label>Username</Form.Label>
+          <Form.Control type="text" placeholder="Enter username" name="name" ref={nameRef} />
+        </Form.Group>
+        {/* <label htmlFor="username">Username:</label>
+        <input type="text" name="username" ref={nameRef} required /> */}
+        <Form.Group className="mb-3" controlId="formGridEmail">
+          <Form.Label>Email</Form.Label>
+          <Form.Control type="text" placeholder="Enter email" name="email" ref={emailRef} />
+        </Form.Group>
+        {/* <label htmlFor="email">email:</label>
+        <input type="email" ref={emailRef} name="email" required /> */}
+        <label htmlFor="gender">Gender</label>
+        
+        {[ 'radio'].map((type) => (
+        <div key={`default-${type}`} className="mb-3">
+          <Form.Check // prettier-ignore
+            type={type}
+            id={`Male`}
+            label={`Male`}
+            checked={gender === "Male"}
+            onChange={onGenderChange}
+          />
+
+          <Form.Check
+            type={type}
+            label={`Female`}
+            id={`Female`}
+            checked={gender === "Female"}
+            onChange={onGenderChange}
+          />
+        </div>
+      ))}
+        
+        {/* <label>
           <input
             type="radio"
             name="gender"
@@ -80,9 +121,29 @@ function SignUp() {
             required
           />
           Female
-        </label>
+        </label> */}
         <label htmlFor="role-coach">Coach</label>
-        <input
+        {[ 'radio'].map((type) => (
+        <div key={`default-${type}`} className="mb-3">
+          <Form.Check // prettier-ignore
+            type={type}
+            id={`coach`}
+            label={`coach`}
+            checked={role === "coach"}
+            onChange={onOptionChange}
+          />
+
+          <Form.Check
+            type={type}
+            label={`user`}
+            id={`user`}
+            checked={role === "user"}
+            onChange={onOptionChange}
+          />
+        </div>
+        ))}
+        
+        {/* <input
           type="radio"
           name="role"
           checked={role === "coach"}
@@ -98,26 +159,47 @@ function SignUp() {
           value="user"
           onChange={onOptionChange}
           required
-        />
-        <label htmlFor="password">Password:</label>
+        /> */}
+        <Row className="mb-3">
+        <Form.Group as={Col} controlId="formGridPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control type='password'  placeholder="Enter Password" name="password" ref={passwordRef} />
+        </Form.Group>
+
+        <Form.Group as={Col} controlId="formGridPassword">
+          <Form.Label>Password Confirm</Form.Label>
+          <Form.Control type="password" placeholder="Confirm Password" name="passwordc" ref={passwordcRef} />
+        </Form.Group>
+        </Row>
+
+        {/* <label htmlFor="password">Password:</label>
         <input type="password" ref={passwordRef} name="password" required />
         <label htmlFor="passwordc">Password Confirm:</label>
-        <input type="password" ref={passwordcRef} name="passwordc" required />
-        <label htmlFor="profilePicture">Profile Picture</label>
-        <input
+        <input type="password" ref={passwordcRef} name="passwordc" required /> */}
+        <Form.Group controlId="formFileLg" className="mb-3">
+          <Form.Label>Profile Picture</Form.Label>
+          <Form.Control type="file" name='profilePicture' ref={profilePictureRef} onChange={handleFileChange} size="lg" accept="image/*" />
+        </Form.Group>
+        {/* <label htmlFor="profilePicture">Profile Picture</label> */}
+        
+        {/* <input
           name="profilePicture"
           type="file"
           ref={profilePictureRef}
           onChange={handleFileChange}
           accept="image/*"
           required
-        />
-        <button type="submit">SignUp</button>
-      </form>
-      <p>
+        /> */}
+        {/* <button type="submit">SignUp</button> */}
+        <Button variant="primary" type="submit"  className='w-100'>
+        Submit
+        </Button>
+      </Form>
+      <p className="mt-3" style={{ textAlign: "center" }}>
         Already have an account?{" "}
-        <Link to="http://localhost:5173/login">LogIn</Link>
+        <Link to={`/login`}>LogIn</Link>
       </p>
+      </Container>
     </div>
   );
 }
