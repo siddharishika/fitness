@@ -81,57 +81,85 @@ const isNotCoach = async (req, res, next) => {
 };
 
 const isVideoAuthor =async(req,res,next)=>{
-    let {id} = req.params;
+    const mongoose = require('mongoose');
+    const id = req.params.id || req.body.id;
+    if (!id || !mongoose.Types.ObjectId.isValid(String(id))) {
+        return res.status(400).send({
+            success: false,
+            message: 'Video id is required',
+        });
+    }
     let found=await FitnessVideo.findById(id);
+    if (!found) {
+        return res.status(404).send({
+            success: false,
+            message: 'Video not found',
+        });
+    }
     if(req.user._id.equals(found.coach)){
-        console.log("You are author of this video")
         next();
     }else{
-        res.status(200).send({
+        res.status(403).send({
             success: false,
             message: 'You are not author of this video'
           })
         return;
     }
-    
 }
+
+const AUTHOR_OWN_CONTENT_MESSAGE =
+  "You cannot rate or review your own content.";
 
 const isNotVideoAuthor = async (req, res, next) => {
   let { id } = req.params;
   let found = await FitnessVideo.findById(id);
-  if (req.user._id.equals(found.coach)) {
-    console.log("You are the author of this video, so cant review or rate");
-    res.status(200).send({
+  if (!found) {
+    return res.status(404).send({
       success: false,
-      message: "You are the author of this video, so cant review or rate",
+      message: "Video not found",
     });
-    return;
-  } else {
-      console.log("You are not author of this video");
-      next();
-
   }
+  if (req.user._id.equals(found.coach)) {
+    return res.status(403).send({
+      success: false,
+      message: AUTHOR_OWN_CONTENT_MESSAGE,
+    });
+  }
+  next();
 };
 
 const isNotProgramAuthor = async (req, res, next) => {
   let { id } = req.params;
   let found = await Program.findById(id);
-  if (req.user._id.equals(found.coach)) {
-    console.log("You are the author of this program, so cant review or rate");
-    res.status(200).send({
+  if (!found) {
+    return res.status(404).send({
       success: false,
-      message: "You are the author of this program, so cant review or rate",
+      message: "Program not found",
     });
-    return;
-  } else {
-      console.log("You are not author of this program");
-      next();
-
   }
+  if (req.user._id.equals(found.coach)) {
+    return res.status(403).send({
+      success: false,
+      message: AUTHOR_OWN_CONTENT_MESSAGE,
+    });
+  }
+  next();
 };
 const isProgramAuthor = async (req, res, next) => {
-  let { id } = req.params;
+  const id = req.params.id || req.body.id;
+  if (!id) {
+    return res.status(400).send({
+      success: false,
+      message: "Program id is required",
+    });
+  }
   let found = await Program.findById(id);
+  if (!found) {
+    return res.status(404).send({
+      success: false,
+      message: "Program not found",
+    });
+  }
   if (req.user._id.equals(found.coach)) {
     console.log("You are the author of this program");
     next();
@@ -148,25 +176,37 @@ const isProgramAuthor = async (req, res, next) => {
 
 const isNotRecipeOwner = async (req, res, next) => {
   let { id } = req.params;
-  let found = await Recipe.findById(id); 
-  console.log("Found recipe user", found.user); 
-  if (req.user._id.equals(found.user)) {
-    console.log("You are the author of this recipe");
-    res.status(200).send({
-        success: false,
-        message: "You are the author of this recipe"
-      });
-    return;
-  } else {
-      console.log("You are not author of this recipe");
-      next();  
+  let found = await Recipe.findById(id);
+  if (!found) {
+    return res.status(404).send({
+      success: false,
+      message: "Recipe not found",
+    });
   }
-};  
+  if (req.user._id.equals(found.user)) {
+    return res.status(403).send({
+      success: false,
+      message: AUTHOR_OWN_CONTENT_MESSAGE,
+    });
+  }
+  next();
+};
 
 const isRecipeOwner = async (req, res, next) => {
-  let { id } = req.params;
-  let found = await Recipe.findById(id); 
-  console.log("Found recipe user", found.user); 
+  const id = req.params.id || req.body._id || req.body.id;
+  if (!id) {
+    return res.status(400).send({
+      success: false,
+      message: "Recipe id is required",
+    });
+  }
+  let found = await Recipe.findById(id);
+  if (!found) {
+    return res.status(404).send({
+      success: false,
+      message: "Recipe not found",
+    });
+  }
   if (req.user._id.equals(found.user)) {
     console.log("You are the author of this recipe");
     next();
@@ -175,7 +215,7 @@ const isRecipeOwner = async (req, res, next) => {
       success: false,
       message: "You are not the author of this recipe"
     });
-    return; 
+    return;
   }
 };  
 

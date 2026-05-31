@@ -1,14 +1,21 @@
 import axios from 'axios';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faStar } from '@fortawesome/free-solid-svg-icons'
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Rating from '../Utils/Rating';
+import StarRatingDisplay from '../Utils/StarRatingDisplay';
 import VideoPlayer from '../Utils/VideoPlayer';
 import { useAuth } from '../Utils/AuthProvider';
 import { useRef } from 'react';
 import { Button, Card, Form, InputGroup } from 'react-bootstrap';
-
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import { useLoginPrompt } from '../Utils/useLoginPrompt';
+import { isAuthorContentError } from '../Utils/authorContent';
+import AuthorContentModal from '../Utils/AuthorContentModal';
+import ConfirmDeleteModal from '../Utils/ConfirmDeleteModal';
+import { useConfirmDelete } from '../Utils/useConfirmDelete';
+import isCoach from '../Utils/isCoach';
+import ReviewComment from '../Utils/ReviewComment';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
@@ -16,112 +23,218 @@ function Show() {
   let location = useLocation();
   let data = location.state;
   let navigate = useNavigate();
-  let [vid, setVid] = useState({
-    name: "",
-    username: "",
-    fileUrl: "",
-    _id: "",
-  });
+  let [vid, setVid] = useState(null);
+  let [loading, setLoading] = useState(true);
   const params = useParams();
-  let [like, setLike] = useState(false);
-  let [newrating, setNewRating] = useState(vid.currentRating); 
+  let [liked, setLiked] = useState(false);
   let reviewRef = useRef(null);
+  const { user } = useAuth();
+  const { promptLogin, redirectToLogin, loginModal, handleAuthResponse } = useLoginPrompt();
+  const { requestDelete, deleteModalProps } = useConfirmDelete();
+  const [showAuthorContent, setShowAuthorContent] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const videoId = data?._id || params?.id;
+
   useEffect(
     function () {
       async function getVideo() {
-        let res = await axios.get(`${API_BASE_URL}/show/${data._id}`, {
-          withCredentials: true,
-        });
-        // setVid(res.data.data);
-        let { name, fileUrl, coach, _id, rating, reviews, currentRating, tags, currentRatingCount} = res.data.data;
-        let { username, _id: coachId } = coach || {};
-        // store coach id so we can check ownership on client
-        setVid({
-          name,
-          username,
-          fileUrl,
-          _id,
-          tags,
-          coachId,
-          rating,
-          reviews,
-          currentRating,
-          currentRatingCount,
-        });
+        if (!videoId) {
+          setLoading(false);
+          return;
+        }
+        setLoading(true);
+        try {
+          let res = await axios.get(`${API_BASE_URL}/show/${videoId}`, {
+            withCredentials: true,
+          });
+          let { name, fileUrl, coach, _id, rating, reviews, currentRating, tags, currentRatingCount } = res.data.data;
+          let { username, _id: coachId } = coach || {};
+          setVid({
+            name,
+            username,
+            fileUrl,
+            _id,
+            tags,
+            coachId,
+            rating,
+            reviews,
+            currentRating,
+            currentRatingCount,
+          });
+          try {
+            let likedRes = await axios.get(`${API_BASE_URL}/getlikedvideos`, { withCredentials: true });
+            if (likedRes.data?.data?.likedVideos) {
+              const exists = likedRes.data.data.likedVideos.some((v) => String(v._id) === String(_id));
+              setLiked(exists);
+            }
+          } catch (err) {
+            // ignore - user might be unauthenticated
+          }
+        } catch (err) {
+          console.log(err, "Failed to load video");
+        } finally {
+          setLoading(false);
+        }
       }
       getVideo();
     },
-    [params]
+    [videoId]
   );
   const handleVideoLike = async (e) => {
+    if (!user) {
+      promptLogin();
+      return;
+    }
     try {
-      let res = await axios.post(`${API_BASE_URL}/changevideolike`, data, {
+      let res = await axios.post(`${API_BASE_URL}/changevideolike`, vid, {
         withCredentials: true,
       });
 
-      if (
-        res.data.success == false &&
-        res.data.message == "You need to be authenticated to access this page!"
-      ) {
-        navigate("/login");
+      if (handleAuthResponse(res)) {
         return;
       }
-      navigate("/");
+      setLiked((prev) => !prev);
     } catch (e) {
+      if (handleAuthResponse(e)) {
+        return;
+      }
       console.log(e, "Nahi ho payega");
     }
   };
-  const { user } = useAuth();
   const handleEditVideo = () => {
-    navigate(`/edit`, { state: vid });
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+    navigate(`/video/edit`, { state: vid });
   };
 
-  const handleVideoDelete = async () => {
-    try {
-      let res = await axios.post(`${API_BASE_URL}/deletevideo/${vid._id}`, vid, { 
-        withCredentials: true,
-      });
-      if ( res.data.success == false &&
-        res.data.message == "You need to be authenticated to access this page!") {
-        navigate("/login");
-        return;
-      }    
-      navigate("/");
-    } catch (e) {
-      console.log(e, "Nahi ho payega");
-    } 
+  const performVideoDelete = async () => {
+    const res = await axios.delete(`${API_BASE_URL}/delete/${vid._id}`, {
+      withCredentials: true,
+    });
+    if (handleAuthResponse(res, { redirect: true })) {
+      return;
+    }
+    navigate("/");
+  };
+
+  const handleVideoDelete = () => {
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+    setDeleteError("");
+    requestDelete({
+      itemLabel: "video",
+      itemName: vid.name,
+      onConfirm: async () => {
+        try {
+          await performVideoDelete();
+        } catch (e) {
+          if (handleAuthResponse(e, { redirect: true })) {
+            return;
+          }
+          const msg =
+            e?.response?.data?.message ||
+            e?.response?.data?.msg ||
+            "Could not delete this video. Please try again.";
+          setDeleteError(msg);
+        }
+      },
+    });
   };
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
+    if (isOwner) {
+      setShowAuthorContent(true);
+      return;
+    }
+    if (!user) {
+      promptLogin();
+      return;
+    }
     try {
       const reviewText = reviewRef.current ? reviewRef.current.value : "";
-      console.log("Submitting review:", reviewText);
-      let res = await axios.post(`${API_BASE_URL}/video/addreview/${vid._id}`, {review: reviewText }, {
-      withCredentials: true,
+      let res = await axios.post(`${API_BASE_URL}/video/addreview/${vid._id}`, { review: reviewText }, {
+        withCredentials: true,
       });
-      if (
-      res.data.success == false &&
-      res.data.message == "You need to be authenticated to access this page!"
-      ) {
-        navigate("/login");
+      if (handleAuthResponse(res)) {
         return;
       }
-      navigate("/show", { state: vid });
-      reviewRef.current.value = "";
-    }catch (e) {
-      console.log(e, "Nahi ho payega"); 
+      if (isAuthorContentError(res)) {
+        setShowAuthorContent(true);
+        return;
+      }
+      const refreshRes = await axios.get(`${API_BASE_URL}/show/${vid._id}`, {
+        withCredentials: true,
+      });
+      const {
+        name,
+        fileUrl,
+        coach,
+        _id,
+        rating,
+        reviews,
+        currentRating,
+        tags,
+        currentRatingCount,
+      } = refreshRes.data.data;
+      const { username, _id: coachId } = coach || {};
+      setVid({
+        name,
+        username,
+        fileUrl,
+        _id,
+        tags,
+        coachId,
+        rating,
+        reviews,
+        currentRating,
+        currentRatingCount,
+      });
+      if (reviewRef.current) {
+        reviewRef.current.value = "";
+      }
+    } catch (e) {
+      if (isAuthorContentError(e)) {
+        setShowAuthorContent(true);
+        return;
+      }
+      if (handleAuthResponse(e)) {
+        return;
+      }
+      console.log(e, "Nahi ho payega");
     }
-  }
+  };
   
 
 
-  const isOwner = user && vid.coachId && String(user._id) === String(vid.coachId);
-  console.log("Rating in show:", newrating);
+  const isOwner = user && vid?.coachId && String(user._id) === String(vid.coachId);
+  const canManage = isCoach(user) && isOwner;
+
+  if (!videoId) {
+    return (
+      <div className="mx-auto p-4 rounded" style={{ color: "#A7C7E7" }}>
+        No video selected. Go back and choose a video to watch.
+      </div>
+    );
+  }
+
+  if (loading || !vid) {
+    return (
+      <div className="mx-auto p-4 rounded" style={{ color: "#A7C7E7" }}>
+        Loading video…
+      </div>
+    );
+  }
+
   return (
     <>
       <div style={{
-        backgroundColor: "#A7C7E7",
+        backgroundColor: "#0e0f14",
         position: "fixed",
         top: 0,
         left: 0,
@@ -130,54 +243,108 @@ function Show() {
         zIndex: -1
       }} />
       <div className='mx-auto p-4 rounded' style={{ position: "relative", zIndex: 1 }}>
-        <h1>{vid.name} by {vid.username}</h1>
-        <Card style={{padding: "20px"}}>
+        <h1 style={{color:'#A7C7E7'}} >{vid.name} by {vid.username}</h1>
+        <Card style={{ border: "5px solid #A7C7E7" ,borderRadius: "10px" }}>
           <VideoPlayer url={vid.fileUrl}  />
-          <span style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px" }}>
-            <i>{vid.currentRating}</i>
-            <FontAwesomeIcon icon={faStar} style={{color: "rgb(255, 212, 59)", width: "20px", height: "20px"}} />
-            <Button variant="light" style={{ border:"2px solid black" }}  onClick={handleVideoLike}>Add to likes</Button>
-            {isOwner && (
-              <>
-                <Button variant="light" style={{ border:"2px solid black" }} onClick={handleEditVideo}>Edit Video</Button>
-                <Button variant='light'style={{ border:"2px solid red" }} onClick={handleVideoDelete}>Delete Video</Button>
-              </>
+          <span style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "10px", backgroundColor: "#A7C7E7" }}>
+            {vid.currentRating > 0 ? (
+              <StarRatingDisplay
+                rating={vid.currentRating}
+                fontSize="clamp(14px, 2.5vw, 28px)"
+              />
+            ) : (
+              <span style={{ color: '#161823' }}>No ratings yet</span>
             )}
+            {vid.tags?.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center" }}>
+                <strong style={{ color: "#161823" }}>Tags:</strong>
+                {vid.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: "999px",
+                      backgroundColor: "#161823",
+                      color: "#A7C7E7",
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+              {deleteError && (
+                <p className="text-danger mb-0 w-100" role="alert">
+                  {deleteError}
+                </p>
+              )}
+              <Button variant="light" style={{ border: "2px solid #A7C7E7", backgroundColor: "#161823", color: "#A7C7E7", flexShrink: 0 }} onClick={handleVideoLike}>{liked ? 'Remove from likes' : 'Add to likes'}</Button>
+              {canManage && (
+                <>
+                  <Button variant="light" style={{ border: "2px solid #A7C7E7", backgroundColor: "#161823", color: "#A7C7E7", flexShrink: 0 }} onClick={handleEditVideo}>Edit Video</Button>
+                  <Button variant='light' style={{ border: "2px solid #A7C7E7", backgroundColor: "#161823", color: "#A7C7E7", flexShrink: 0 }} onClick={handleVideoDelete}>Delete Video</Button>
+                </>
+              )}
+            </div>
           </span>
         </Card>
         <br />
         <br />
-        {!isOwner && <>
-          <h3><i>Rate this video</i></h3>
-          <Rating videoId={vid._id} currentRating={vid.currentRating} currentRatingCount={vid.currentRatingCount} isVideo={true} />
-          <br />
-          <br />
-          <Form onSubmit={handleReviewSubmit} className="p-4 border rounded"  method="POST">
-            <Form.Label><h3><i>Leave a review</i></h3></Form.Label>
+        <Container >
+        <Row>
+        {!isOwner && <div style={{ padding: '10px', border: "2px solid #A7C7E7", backgroundColor: "#A7C7E7", borderRadius: "10px", width: "100%" }} >
+          <h3 style={{ color: "#1f2532" }}><i>Rate this video</i></h3>
+          <Rating
+            videoId={vid._id}
+            currentRating={vid.currentRating}
+            currentRatingCount={vid.currentRatingCount}
+            contentRatings={vid.rating}
+            isVideo={true}
+            isAuthenticated={!!user}
+            isOwner={isOwner}
+            onRequireLogin={promptLogin}
+          />
+          <Form onSubmit={handleReviewSubmit} method="POST">
+            <Form.Label><h3 style={{ color: "#1f2532" }}><i>Leave a review</i></h3></Form.Label>
             <InputGroup style={{padding: "10px"}} >
-              <Form.Control as="textarea" aria-label="With textarea" placeholder="Enter your review here" name="review" ref={reviewRef} />
+              <Form.Control as="textarea" aria-label="With textarea" placeholder="Enter your review here" name="review" ref={reviewRef}/>
             </InputGroup>
-            <Button type="submit" variant='light' style={{border: "2px solid black"}} className='w-100' >Submit</Button>
+            <Button type="submit" variant='light' style={{border: "2px solid black", backgroundColor: "#161823", color: "#A7C7E7"}} className='w-100' >Submit</Button>
           </Form>
-        </>}
-        <>
-          <br />
-          <br />
-          <h2><i>Comments</i></h2>
-          {vid && vid.reviews && vid.reviews.map((rev, i) => {
-            return (
-              <>
-                <Card key={i} style={{padding:"5px", border: "1px solid black" }} >
-                  <Card.Text> <strong><i>{rev.user.username}</i></strong></Card.Text>
-                  <Card.Title>{rev.review}</Card.Title>
-                </Card>
-                <br />
-                <br />
-              </>
-            );
-          })}
-        </>
+        </div>}
+        </Row>
+        </Container>
+        <br />
+
+        <h2 style={{ color: "#A7C7E7" }}><i>Comments</i></h2>
+        <div style={{ border: "2px solid #A7C7E7", padding: "10px", borderRadius: "10px", backgroundColor: "#000000" }}>
+          {vid.reviews?.length > 0 ? (
+            vid.reviews.map((rev, i) => (
+              <div
+                key={rev._id || i}
+                style={{ padding: "10px", backgroundColor: "#000000", borderRadius: "10px", cursor: "pointer" }}
+              >
+                <ReviewComment review={rev} />
+                {i < vid.reviews.length - 1 && (
+                  <hr style={{ borderColor: "#A7C7E7", margin: "1% 0" }} />
+                )}
+              </div>
+            ))
+          ) : (
+            <p style={{ color: "#A7C7E7", margin: 0 }}>No comments yet.</p>
+          )}
+        </div>
+ 
+        
       </div>
+      {loginModal}
+      <ConfirmDeleteModal {...deleteModalProps} />
+      <AuthorContentModal
+        show={showAuthorContent}
+        onHide={() => setShowAuthorContent(false)}
+      />
     </>
   );
 }

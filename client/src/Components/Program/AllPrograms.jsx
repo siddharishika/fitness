@@ -4,6 +4,9 @@ import React, { useEffect, useState } from "react";
 import ShowProgram from "./ShowProgram";
 import { useNavigate } from "react-router-dom";
 import { Card, CardGroup } from "react-bootstrap";
+import '../../App.css';
+import StarRatingDisplay from '../Utils/StarRatingDisplay';
+import { getProgramImage } from '../Utils/getProgramImage';
 import { useRef } from 'react';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
@@ -12,14 +15,6 @@ function AllPrograms() {
   let navigate = useNavigate();
   let [programs, setPrograms] = useState([]);
   let programImageRef = useRef("");
-  function fn(res) {
-    if (
-      res.data.success == false &&
-      res.data.message == "You need to be authenticated to access this page!"
-    ) {
-      navigate("/login");
-    }
-  }
   useEffect(function () {
     async function getProgram() {
       let res = await axios.get(`${API_BASE_URL}/allprograms`, {
@@ -37,10 +32,11 @@ function AllPrograms() {
   return (
     <div>
       <CardGroup>
+      <div className="cards-container">
         {programs && programs.map((program, idx) => (
           <Card
             key={idx}
-            style={{ cursor: "pointer" }}
+            style={{ padding: '10px', border: "2px solid #A7C7E7" ,borderRadius: "10px", cursor: "pointer" }}
             onClick={() => showProgram(program)}
           >
             <Card.Img
@@ -49,10 +45,14 @@ function AllPrograms() {
               ref={programImageRef}
               key={idx}
               p={program._id}
-              src={program.file}
-              alt={program.file}
+              src={getProgramImage(program)}
+              alt={program.name || 'Program image'}
               height="300"
               width="400"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = 'https://via.placeholder.com/400x300?text=No+Image';
+              }}
             />
             <Card.Body>
               <Card.Title>{program.name}</Card.Title>
@@ -80,15 +80,16 @@ function AllPrograms() {
                 <strong>Time per day:</strong> {program.timePerDay}
                 <br />
                 <strong>Rating:</strong>{" "}
-                {program.rating === 0 ? (
-                  <span>No Ratings Yet</span>
+                {program.currentRating > 0 ? (
+                  <StarRatingDisplay rating={program.currentRating} />
                 ) : (
-                  <span>{program.currentRating}</span>
+                  <span>No Ratings Yet</span>
                 )}
               </Card.Text>
             </Card.Body>
           </Card>
         ))}
+      </div>
       </CardGroup>
     </div>
   );

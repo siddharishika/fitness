@@ -5,6 +5,8 @@ import React, { useEffect, useRef, useState } from "react";
 import Show from "./Show";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardGroup } from "react-bootstrap";
+import '../../App.css';
+import StarRatingDisplay from '../Utils/StarRatingDisplay';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 // import {useHistory} from 'react-router-dom';
@@ -31,12 +33,13 @@ function AllVideos() {
 
   return (
     <div>
-      {
-        <CardGroup>
-          {fitnessVideo && fitnessVideo.map(function (vid, idx) {
-            return (
-              <Card key={idx}>
-                <Card.Img
+      <CardGroup>
+      <div className="cards-container">
+        {fitnessVideo && fitnessVideo.map(function (vid, idx) {
+          return (
+            <Card key={idx}
+              style={{ padding: '10px', border: "2px solid #A7C7E7" ,borderRadius: "10px", cursor: "pointer" }}>
+              <Card.Img
                   variant="top"
                   onClick={(e) => showVideo(vid)}
                   ref={imgRef}
@@ -54,8 +57,9 @@ function AllVideos() {
                   <Card.Text>
                     <i>Coach: {vid.coach && vid.coach.username}</i>
                     <br />
-                    Rating: {program.currentRatingCount > 0 ? (
-                      <span>{program.currentRating}</span>
+                    Rating:{' '}
+                    {vid.currentRating > 0 ? (
+                      <StarRatingDisplay rating={vid.currentRating} />
                     ) : (
                       <span>No ratings yet</span>
                     )}
@@ -65,10 +69,10 @@ function AllVideos() {
               <small className="text-muted">Last updated 3 mins ago</small>
             </Card.Footer> */}
             </Card>
-            );
-          })}
-        </CardGroup>
-      }
+          );
+        })}
+      </div>
+      </CardGroup>
     </div>
   );
 }

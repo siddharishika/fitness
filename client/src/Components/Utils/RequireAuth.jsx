@@ -1,9 +1,41 @@
-import { useAuth } from '../Utils/AuthProvider';
-import { Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from './AuthProvider';
+import { useLoginPrompt } from './useLoginPrompt';
+import { LOGIN_REQUIRED_MSG } from './routeToastMessages';
 
-export default function RequireAuth({ children }) {
-  const { user } = useAuth();
-  console.log("RequireAuth user:", user);
-  if (!user) return <Navigate to="/login" replace />;
-  return children;
+export default function RequireAuth({ children, redirectToLogin = false }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  const { promptLogin, loginModal } = useLoginPrompt();
+
+  useEffect(() => {
+    if (!loading && !user && !redirectToLogin) {
+      promptLogin();
+    }
+  }, [user, loading, promptLogin, redirectToLogin]);
+
+  if (loading) {
+    return null;
+  }
+
+  if (!user) {
+    if (redirectToLogin) {
+      return (
+        <Navigate
+          to="/login"
+          replace
+          state={{ authError: LOGIN_REQUIRED_MSG, from: location }}
+        />
+      );
+    }
+    return loginModal;
+  }
+
+  return (
+    <>
+      {children}
+      {loginModal}
+    </>
+  );
 }

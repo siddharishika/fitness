@@ -12,6 +12,7 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import TagAdder from "../Utils/TagAdder";
+import { useLoginPrompt } from "../Utils/useLoginPrompt";
 
 
 const API_BASE_URL =
@@ -20,7 +21,9 @@ var file = {};
 var imgFile = {};
 function UploadDemo(props) {
   let navigate = useNavigate();
+  const { loginModal, handleAuthResponse } = useLoginPrompt();
   let fileRef = useRef();
+  let imgFileRef = useRef();
   let tagRef = useRef();
   // let [arr,setArr]=useState([]);
   let arr = [];
@@ -30,6 +33,8 @@ function UploadDemo(props) {
   let [tagsList, setTagsList] = useState({});
   const [tags, setVideoTags] = useState(props.tags); 
   const [selectedTags, setSelectedTags] = useState([]);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
 
   const handlePlus = (e) => {
@@ -51,57 +56,78 @@ function UploadDemo(props) {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      let form = document.querySelector("form");
+    setError("");
 
-      arr = [...arr, ...Object.keys(tagsList).filter((tag) => tagsList[tag])];
-      let formData = new FormData(form);
-      formData.append("tags", selectedTags.join(","));
-      // let x=formData.get('file');
-      // formData.append("file",file);
-      let info = Object.fromEntries(formData);
-      var options = { content: formData };
-      if (!info.imgFile.name || !info.file.name) {
-        console.log("Please add files first");
-      } else {
-        let res = await axios.post(`${API_BASE_URL}/add`, formData, {
-          withCredentials: true,
-        });
-        if (
-          res.data.success == false &&
-          res.data.message ==
-            "You need to be authenticated to access this page!"
-        ) {
-          navigate("/login");
-          return;
-        }
-        if (
-          res.data.success == false &&
-          res.data.message == "You need to be a coach to access this page!"
-        ) {
-          navigate("/signup");
-          return;
-        }
-        // Navigate to home after successful upload
-        navigate("/");
+    const form = e.target;
+    const formData = new FormData(form);
+    const name = formData.get("name")?.toString().trim();
+    const videoFile = formData.get("file");
+    const imageFile = formData.get("imgFile");
+
+    if (!name) {
+      setError("Please enter a video title.");
+      return;
+    }
+    if (!videoFile?.name) {
+      setError("Please select a workout video file.");
+      return;
+    }
+    if (!imageFile?.name) {
+      setError("Please select a thumbnail photo.");
+      return;
+    }
+
+    formData.set("tags", selectedTags.join(","));
+
+    setSubmitting(true);
+    try {
+      let res = await axios.post(`${API_BASE_URL}/add`, formData, {
+        withCredentials: true,
+      });
+      if (handleAuthResponse(res)) {
+        return;
       }
-    } catch (e) {
-      console.log(e, "Nahi ho payega");
+      if (
+        res.data.success == false &&
+        res.data.message == "You need to be a coach to access this page!"
+      ) {
+        navigate("/signup");
+        return;
+      }
       navigate("/");
+    } catch (err) {
+      if (handleAuthResponse(err)) {
+        return;
+      }
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.msg ||
+        "Could not upload video. Please try again.";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
   return (
+    <>
     <div className='mx-auto'> 
       <Container className="p-4 border rounded">
       <Form onSubmit={handleSubmit} encType="multipart/form-data" method="POST">
       {/* <form onSubmit={handleSubmit} encType="multipart/form-data" method="POST"> */}
         <div className="text-center mb-4">
-          <h2>Upload Video</h2>
-          <p>Upload your first video as a coach!</p>
+          <h2 style={{ color: "#A7C7E7" }}>Upload Video</h2>
+          <p style={{ color: "#A7C7E7" }}>Upload your workout video and a thumbnail photo.</p>
         </div>
+
+        {error && (
+          <p className="text-danger" role="alert">
+            {error}
+          </p>
+        )}
+
         <Form.Group className="mb-3" controlId="formGridTitle">
           <Form.Label>Video Title</Form.Label>
-          <Form.Control type="text" placeholder="Enter video title" name="name" />
+          <Form.Control type="text" placeholder="Enter video title" name="name" required />
         </Form.Group>
         
         <TagAdder tags={tags} onTagsChange={handleTagsChange}  />
@@ -111,22 +137,46 @@ function UploadDemo(props) {
           })}
         </ul>
         <Form.Group controlId="formFileLg" className="mb-3">
-          <Form.Label>Video File</Form.Label>
-          <Form.Control type="file" name='file' ref={fileRef} onChange={handleFileChange} size="lg" />
+          <Form.Label>Video File <span className="text-danger">*</span></Form.Label>
+          <Form.Control
+            type="file"
+            name="file"
+            ref={fileRef}
+            onChange={handleFileChange}
+            accept="video/*"
+            size="lg"
+            required
+          />
         </Form.Group>
-        <Form.Group controlId="formFileLg" className="mb-3">
-          <Form.Label>Image File</Form.Label>
-          <Form.Control type="file" name='imgFile' ref={fileRef} onChange={handleFileChange2} size="lg" />
+        <Form.Group controlId="formFileImg" className="mb-3">
+          <Form.Label>Thumbnail Photo <span className="text-danger">*</span></Form.Label>
+          <Form.Control
+            type="file"
+            name="imgFile"
+            ref={imgFileRef}
+            onChange={handleFileChange2}
+            accept="image/*"
+            size="lg"
+            required
+          />
         </Form.Group>
 
-        <Button variant="primary" type="submit" className='w-100'>
-        Submit
+        <Button
+          variant="light"
+          type="submit"
+          className="w-100"
+          disabled={submitting}
+          style={{ border: "2px solid #A7C7E7", backgroundColor: "#161823", color: "#A7C7E7" }}
+        >
+          {submitting ? "Uploading…" : "Submit"}
         </Button>
         {/* <button type="submit">Submit</button> */}
       {/* </form> */}
       </Form>
       </Container>
     </div>
+    {loginModal}
+    </>
   );
 }
 

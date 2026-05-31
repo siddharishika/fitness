@@ -1,14 +1,19 @@
 const express=require('express');
 const FitnessVideo = require('../models/videoModel');
 const Program = require('../models/Program');
-const { isLoggedIn, isNotRecipeOwner, isRecipeOwner } = require('../middleware');
+const { isLoggedIn, isCoach, isNotRecipeOwner, isRecipeOwner } = require('../middleware');
 const Recipe = require('../models/Recipe');
 const User = require('../models/User');
 const { route } = require('./uploadRoute');
+const { deleteImageKitFileByUrl } = require('../utils/imageKitCleanup');
 const router=express.Router();
 
+async function deleteRecipePhotoFromImageKit(photoUrl) {
+  await deleteImageKitFileByUrl(photoUrl);
+}
 
-router.post('/addrecipe',isLoggedIn, async(req,res)=>{
+
+router.post('/addrecipe',isLoggedIn, isCoach, async(req,res)=>{
     
     try{
        let {name,process, description, tags, timeRequired , ingredients, photo}=req.body;
@@ -78,12 +83,42 @@ router.get('/allrecipes',async(req,res)=>{
     }
 })
 
+router.get('/allrecipes/:tag', async (req, res) => {
+    try {
+        let tag = req.params.tag;
+        let recipes = await Recipe.find({ tags: tag })
+            .populate('user')
+            .populate('reviews.user');
+        res.status(200).json({ msg: "Gotcha", data: recipes });
+    } catch (e) {
+        res.status(400).json({ msg: "Something went wrong..." });
+    }
+});
 
-router.delete('/deleterecipe/:id',isLoggedIn ,async (req,res)=>{
+router.get('/showrecipe/:id', async (req, res) => {
+    try {
+        const recipe = await Recipe.findById(req.params.id)
+            .populate('user')
+            .populate('reviews.user');
+        if (!recipe) {
+            return res.status(404).json({ msg: "Recipe not found" });
+        }
+        res.status(200).json({ msg: "Gotcha", data: recipe });
+    } catch (e) {
+        console.error(e);
+        res.status(400).json({ msg: "Something went wrong..." });
+    }
+});
+
+router.delete('/deleterecipe/:id',isLoggedIn, isCoach, isRecipeOwner ,async (req,res)=>{
     try {
         let id=req.params.id;
-        
-        let response=await Recipe.findByIdAndDelete(id);
+        const recipe = await Recipe.findById(id);
+        if (!recipe) {
+            return res.status(404).json({ msg: "Recipe not found" });
+        }
+        await deleteRecipePhotoFromImageKit(recipe.photo);
+        await Recipe.findByIdAndDelete(id);
         res.status(201).json({msg: "Gotcha" });
     } catch (e) {
         res.status(400).json({msg: "Something went wrong..." });
@@ -156,10 +191,10 @@ router.patch('/recipe/addrating/:id', isLoggedIn, isNotRecipeOwner,  async (req,
     newRatingCount = Number(newRatingCount);
     console.log("Rating data accumlated");
     let found = await Recipe.findById(id);
-    for(let i=0;i<found.currentRatingCount;i++){
-        if(found.rating[i].user.toString()===userId.toString()){
-            return res.status(400).json({ msg: "You have already rated this recipe" });
-        }
+    for (let i = 0; i < found.rating.length; i++) {
+      if (found.rating[i].user.toString() === userId.toString()) {
+        return res.status(400).json({ msg: "You have already rated this recipe" });
+      }
     }
     const updated = await Recipe.findByIdAndUpdate(
       id,
@@ -178,21 +213,29 @@ router.patch('/recipe/addrating/:id', isLoggedIn, isNotRecipeOwner,  async (req,
   }
 });
 
-router.post('/deleterecipe/:id',isLoggedIn ,async (req,res)=>{
+router.post('/deleterecipe/:id',isLoggedIn, isCoach, isRecipeOwner ,async (req,res)=>{
     try {
         let id=req.params.id;
-        
-        let response=await Recipe.findByIdAndDelete(id);
+        const recipe = await Recipe.findById(id);
+        if (!recipe) {
+            return res.status(404).json({ msg: "Recipe not found" });
+        }
+        await deleteRecipePhotoFromImageKit(recipe.photo);
+        await Recipe.findByIdAndDelete(id);
         res.status(201).json({msg: "Gotcha" });
     } catch (e) {
         res.status(400).json({msg: "Something went wrong..." });
     }
 })
 
-router.post('/edit',isLoggedIn, isRecipeOwner, async(req,res)=>{
+router.post('/edit',isLoggedIn, isCoach, isRecipeOwner, async(req,res)=>{
     try{
        let {name,process, description, tags, timeRequired , ingredients, photo}=req.body;
        let user=req.user._id;
+       const existingRecipe = await Recipe.findOne({ user, _id: req.body._id });
+       if (!existingRecipe) {
+         return res.status(404).json({ msg: "Recipe not found" });
+       }
        // normalize tags: allow comma string or array
        let tagsArr = [];
        if (Array.isArray(tags)) tagsArr = tags.map(t => String(t).trim()).filter(Boolean);
@@ -215,6 +258,9 @@ router.post('/edit',isLoggedIn, isRecipeOwner, async(req,res)=>{
        console.log("Normalized recipe payload", { name, tagsArr, processArr, ingredientsArr, timeRequired, photo, user });
        if(!photo){
             photo = "https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=1498&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+       }
+       if (photo !== existingRecipe.photo) {
+         await deleteRecipePhotoFromImageKit(existingRecipe.photo);
        }
         const newRecipe = await Recipe.findOneAndUpdate({user: user._id, _id: req.body._id}, {
             name,

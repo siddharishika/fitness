@@ -17,8 +17,17 @@ router.post('/add',isLoggedIn,isCoach ,upload.fields([
     { name: 'imgFile', maxCount: 1 }
    ]),   async(req,res)=>{
     
-        // let {formData}=req.body;
         var {name , tags}=req.body;
+
+        if (!name?.trim()) {
+            return res.status(400).json({ msg: "Video title is required." });
+        }
+        if (!req.files?.file?.[0]) {
+            return res.status(400).json({ msg: "Workout video file is required." });
+        }
+        if (!req.files?.imgFile?.[0]) {
+            return res.status(400).json({ msg: "Thumbnail photo is required." });
+        }
 
         let arr=tags.split(",");
         
@@ -27,7 +36,7 @@ router.post('/add',isLoggedIn,isCoach ,upload.fields([
             if (err) throw err; // Fail if the file can't be read.
             imagekit.upload({
               file : data, //required
-              fileName : name, //required
+              fileName : `${String(name).trim().replace(/\s+/g, "_")}.mp4`, //required
               folder: '/fitness'
             }, async function(error, result) {
               if(error) console.log(error);

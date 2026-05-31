@@ -30,45 +30,6 @@ const myJourneyRoutes=require('./apis/myJourney')
 
 app.use(express.static(path.join(__dirname, "../client/dist")));
 
-
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", 
-      "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-  });
-
-
-
-app.use(methodOverride('_method'));
-
-
-app.use(express.json())
-app.use(express.urlencoded({extended:true}));
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(cookieParser());
-app.use(session({
-    secret: 'keyboard cat',
-    resave: true,
-    saveUninitialized: false,
-    cookie:{
-        httpOnly : true,
-        expires : Date.now() + 7*24*60*60*1000,
-        maxAge : 7*24*60*60*1000
-    }
-  }));
-
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(passport.authenticate('session'));
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
-
-
-
 const allowedOrigins = [
   "http://localhost:5173", // local frontend
   "https://fitness-social.onrender.com", // deployed frontend
@@ -91,7 +52,36 @@ app.use(
   })
 );
 
+app.use(methodOverride('_method'));
 
+
+app.use(express.json())
+app.use(express.urlencoded({extended:true}));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(cookieParser());
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'keyboard cat',
+    resave: false,
+    saveUninitialized: false,
+    cookie:{
+        httpOnly : true,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge : 7*24*60*60*1000
+    }
+  }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(passport.authenticate('session'));
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 
 app.use(uploadRoutes);
 app.use(videoRoutes);
@@ -99,6 +89,7 @@ app.use(authRoutes);
 app.use(programRoutes);
 app.use(recipeRoutes);
 app.use(myJourneyRoutes);
+
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
 });

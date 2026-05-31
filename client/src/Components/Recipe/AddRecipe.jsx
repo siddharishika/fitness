@@ -1,157 +1,249 @@
-import axios from "axios";
-
 import React, { useRef, useState } from "react";
+import { IoAddOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Button, Container, Form, Row, Col } from "react-bootstrap";
+import TagAdder from "../Utils/TagAdder";
+import { useLoginPrompt } from "../Utils/useLoginPrompt";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-function AddRecipe() {
-  let [ingredients, setIngredients] = useState([]);
-  let [process, setProcess] = useState([]);
-  let ingredientRef = useRef();
-  let amountRef = useRef();
-  let processRef = useRef();
-  let [tags, setTags] = useState([]);
-  let tagRef = useRef();
-  let timeRequiredRef = useRef();
-  let nameRef = useRef();
-  let descriptionRef = useRef();
-  let photoRef = useRef();
-  let navigate = useNavigate();
-  function fn(res) {}
-  const handleIngredients = (e) => {
-    let arr = [...ingredients];
-    let obj = {};
-    obj.ingredient = ingredientRef.current.value;
-    obj.amount = 0;
-    arr.push(obj);
-    setIngredients(arr);
+const submitBtnStyle = {
+  border: "2px solid #A7C7E7",
+  backgroundColor: "#161823",
+  color: "#A7C7E7",
+};
+
+function AddRecipe(props) {
+  const navigate = useNavigate();
+  const { loginModal, handleAuthResponse } = useLoginPrompt();
+
+  const [ingredients, setIngredients] = useState([]);
+  const [process, setProcess] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  const nameRef = useRef();
+  const descriptionRef = useRef();
+  const photoRef = useRef();
+  const timeRequiredRef = useRef();
+  const ingredientRef = useRef();
+  const amountRef = useRef();
+  const processRef = useRef();
+
+  const tags = props.tags || [];
+
+  const handleAddIngredient = (e) => {
+    e.preventDefault();
+    const ingredient = ingredientRef.current?.value?.trim();
+    const amount = amountRef.current?.value?.trim() || "0";
+    if (!ingredient) return;
+    setIngredients((prev) => [...prev, { ingredient, amount }]);
+    ingredientRef.current.value = "";
+    amountRef.current.value = "";
   };
-  const handleAmount = (idx) => {
-    let arr = [];
-    let amount = document.getElementById("amount" + idx);
-    for (let i = 0; i < ingredients.length; i++) {
-      if (i == idx) {
-        let obj = {};
-        obj.ingredient = ingredients[i].ingredient;
-        obj.amount = amount.value;
-        arr.push(obj);
-      } else {
-        arr.push(ingredients[i]);
-      }
-    }
-    setIngredients(arr);
+
+  const handleRemoveIngredient = (idx) => {
+    setIngredients((prev) => prev.filter((_, i) => i !== idx));
   };
-  const handleProcess = (e) => {
-    let arr = [...process];
-    arr.push(processRef.current.value);
-    setProcess(arr);
+
+  const handleAddProcess = (e) => {
+    e.preventDefault();
+    const step = processRef.current?.value?.trim();
+    if (!step) return;
+    setProcess((prev) => [...prev, step]);
+    processRef.current.value = "";
   };
-  const handleTag = (e) => {
-    let arr = [...tags];
-    arr.push(tagRef.current.value);
-    setTags(arr);
+
+  const handleRemoveProcess = (idx) => {
+    setProcess((prev) => prev.filter((_, i) => i !== idx));
   };
+
+  const handleTagsChange = (tagList) => {
+    setSelectedTags(tagList);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let data = {};
-    data.timeRequired = timeRequiredRef.current.value;
-    data.process = process;
-    data.tags = tags.join(",");
-    data.ingredients = ingredients;
-    data.name = nameRef.current.value;
-    data.description = descriptionRef.current.value;
-    data.photo = photoRef.current.value;
+    const data = {
+      name: nameRef.current.value,
+      description: descriptionRef.current.value,
+      photo: photoRef.current.value,
+      timeRequired: timeRequiredRef.current.value,
+      ingredients,
+      process,
+      tags: selectedTags.join(","),
+    };
     try {
-      let res = await axios.post(`${API_BASE_URL}/addrecipe`, data, {
+      const res = await axios.post(`${API_BASE_URL}/addrecipe`, data, {
         withCredentials: true,
       });
-      if (
-        res.data.success == false &&
-        res.data.message == "You need to be authenticated to access this page!"
-      ) {
-        navigate("/login");
+      if (handleAuthResponse(res, { redirect: true })) {
         return;
       }
-      navigate("/");
-    } catch (e) {
-      console.log(e, "Nahi ho payega");
+      navigate("/allrecipes");
+    } catch (err) {
+      if (handleAuthResponse(err, { redirect: true })) {
+        return;
+      }
+      console.log(err, "Nahi ho payega");
     }
   };
+
   return (
-    <form method="POST">
-      AddRecipe
-      <label htmlFor="name">Name of Recipe</label>
-      <input type="text" ref={nameRef} />
-      <br />
-      <label htmlFor="Ingredients">Ingredient</label>
-      <input type="text" ref={ingredientRef} />
-      <div onClick={handleIngredients}>+</div>
-      <br />
-      <ul>
-        {ingredients && ingredients.map((ele, idx) => {
-          return (
-            <li key={idx}>
-              <div>{ele.ingredient}</div>
-              <label htmlFor="amount">Amont of ingredient in grams</label>
-              <input type="text" name="" id={"amount" + idx} />
-              <div onClick={(e) => handleAmount(idx)}>+</div>
-              <div>{ele.amount}</div>
-            </li>
-          );
-        })}
-      </ul>
-      <br />
-      <label htmlFor="description">Description of the Recipe</label>
-      <textarea
-        name="description"
-        id=""
-        cols="30"
-        rows="10"
-        ref={descriptionRef}
-      ></textarea>
-      <br />
-      <label htmlFor="process">Process</label>
-      <textarea
-        name="process"
-        id=""
-        cols="30"
-        rows="10"
-        ref={processRef}
-      ></textarea>
-      <div onClick={handleProcess}>+</div>
-      <br />
-      <ul>
-        {process && process.map((ele, idx) => {
-          return <li key={idx}>{ele}</li>;
-        })}
-      </ul>
-      <br />
-      <label htmlFor="tags">Tag</label>
-      <input type="text" ref={tagRef} />
-      <div onClick={handleTag}>+</div>
-      <ul>
-        {tags && tags.map((tag, idx) => {
-          return <li key={idx}>{tag}</li>;
-        })}
-      </ul>
-      <br />
-      <label htmlFor="photo">Image URL</label>
-      <textarea
-        name="photo"
-        id=""
-        cols="30"
-        rows="10"
-        ref={photoRef}
-      ></textarea>
-      <br />
-      <label htmlFor="timeRequired">Time Required for Cooking</label>
-      <input type="number" ref={timeRequiredRef} />
-      <button type="submit" onClick={handleSubmit}>
-        Add Recipe
-      </button>
-    </form>
+    <>
+      <div className="mx-auto">
+        <Container className="p-4 border rounded">
+          <Form onSubmit={handleSubmit} method="POST">
+            <div className="text-center mb-4">
+              <h2 style={{ color: "#A7C7E7" }}>Add your recipe here!</h2>
+            </div>
+
+            <Form.Group className="mb-3" controlId="recipeName">
+              <Form.Label>Recipe Name</Form.Label>
+              <Form.Control
+                type="text"
+                ref={nameRef}
+                placeholder="Enter recipe name"
+                required
+              />
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3" controlId="timeRequired">
+                  <Form.Label>Time Required (minutes)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    ref={timeRequiredRef}
+                    min={0}
+                    placeholder="0"
+                    required
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3" controlId="description">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                ref={descriptionRef}
+                placeholder="Describe your recipe"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Tags</Form.Label>
+              <TagAdder tags={tags} onTagsChange={handleTagsChange} />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Ingredients</Form.Label>
+              <Row className="g-2 mb-2">
+                <Col md={6}>
+                  <Form.Control
+                    type="text"
+                    ref={ingredientRef}
+                    placeholder="Ingredient name"
+                  />
+                </Col>
+                <Col md={4}>
+                  <Form.Control
+                    type="text"
+                    ref={amountRef}
+                    placeholder="Amount (grams)"
+                  />
+                </Col>
+                <Col md={2}>
+                  <Button
+                    variant="light"
+                    style={submitBtnStyle}
+                    onClick={handleAddIngredient}
+                    type="button"
+                    className="w-100"
+                  >
+                    Add Ingredient
+                  </Button>
+                </Col>
+              </Row>
+              <ul className="list-unstyled mb-0">
+                {ingredients.map((item, idx) => (
+                  <li key={idx} className="d-flex align-items-center gap-2 mb-1">
+                    <span>{item.ingredient} — {item.amount}grams</span>
+                    <Button
+                      variant="link"
+                      className="text-danger p-0"
+                      type="button"
+                      onClick={() => handleRemoveIngredient(idx)}
+                    >
+                      Remove
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Cooking Steps</Form.Label>
+              <Row className="g-2 mb-3">
+                <Col>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    ref={processRef}
+                    placeholder="Add a cooking step"
+                  />
+                </Col>
+                <Col xs="auto" className="d-flex align-items-start">
+                  <Button
+                    variant="light"
+                    style={submitBtnStyle}
+                    onClick={handleAddProcess}
+                    type="button"
+                  >
+                    <IoAddOutline />
+                  </Button>
+                </Col>
+              </Row>
+              <ol className="mb-0 ps-3">
+                {process.map((step, idx) => (
+                  <li key={idx} className="mb-2">
+                    <div className="d-flex align-items-start justify-content-between gap-3">
+                      <span style={{ flex: 1 }}>{step}</span>
+                      <Button
+                        variant="link"
+                        className="text-danger p-0 flex-shrink-0"
+                        type="button"
+                        onClick={() => handleRemoveProcess(idx)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="photo">
+              <Form.Label>Image URL</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                ref={photoRef}
+                placeholder="Paste recipe image URL"
+              />
+            </Form.Group>
+
+            <Button variant="light" style={submitBtnStyle} type="submit" className="w-100">
+              Submit
+            </Button>
+          </Form>
+        </Container>
+      </div>
+      {loginModal}
+    </>
   );
 }
 

@@ -1,85 +1,224 @@
 import axios from 'axios';
-import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import { Card, CardGroup } from 'react-bootstrap';
+import '../../App.css';
+import StarRatingDisplay from '../Utils/StarRatingDisplay';
+import { getProgramImage } from '../Utils/getProgramImage';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
-// import {useHistory} from 'react-router-dom';
-function AllProgramsTags(tags) {
-  let navigate=useNavigate();
-  let programImageRef = useRef("");
 
-  let [tagsProgram, setTagsProgram] = useState({});
-  console.log("This is tags", tags.tags);
+const itemCardStyle = {
+  padding: '10px',
+  border: '2px solid #A7C7E7',
+  borderRadius: '10px',
+  cursor: 'pointer',
+  backgroundColor: '#000000',
+};
 
-    useEffect(() => {
-    async function fetchPrograms() {
-      tags=tags.tags || [];
-      tags.map((tag) => {
-        setTagsProgram(prev => ({...prev, [tag]: []})); 
-      });
-      let tagsObj = {};
-      for (const tag of tags) {
-        const res = await axios.get(`${API_BASE_URL}/allprograms/${tag}`, { withCredentials: true });
-        tagsObj[tag] = res.data.data;
-      }
-      console.log("Tags Object:", tagsObj);
-      setTagsProgram(tagsObj);
-    }
-    fetchPrograms();
-  }, [tags]);
+const tagGroupBoxStyle = {
+  padding: '16px',
+  border: '2px solid #A7C7E7',
+  borderRadius: '10px',
+  backgroundColor: '#161823',
+  marginBottom: '28px',
+};
 
-  const showProgram=(program)=>{
-    navigate(`/showprogram`, { state: program });
-  }
-  
-  
-  return (
-    <div>
+const CARD_WIDTH = 300;
+const CARD_GAP = 24;
+const HORIZONTAL_INSET = 112;
 
-      {
-        Object.entries(tagsProgram).map(([tag, programs]) => (
-          programs.length > 0 && (
-            <div key={tag}>
-              <h3>{tag}</h3>
-              <CardGroup>
-              {programs && programs.map((program, idx) => (
-                <div key={program._id || idx}>
-                <Card>
-                  <Card.Img
-                    variant="top"
-                    onClick={(e) => showProgram(program)}
-                    ref={programImageRef}
-                    key={idx}
-                    p={program._id}
-                    src={program.file}
-                    alt={program.file}
-                    height="300"
-                    width="400"
-                  />
-                  <Card.Body>
-                    <Card.Title>{program.name}</Card.Title>
-                    <Card.Text>
-                      <br />
-                      <i>Coach: {program.coach && program.coach.username}</i>
-                      <br />
-                      Rating: {program.currentRatingCount > 0 ? <span>{program.currentRating}</span> : <span>No ratings yet</span>}
-                      <br />
-                    </Card.Text>
-                  </Card.Body>
-                
-                </Card>
-                </div>
-                
-              ))}
-              </CardGroup>
-            </div>
-          )
-        ))
-      }
-    </div>
-  )
+function getCardLimitForWidth(width) {
+  const available = width - HORIZONTAL_INSET;
+  return Math.max(1, Math.floor((available + CARD_GAP) / (CARD_WIDTH + CARD_GAP)));
 }
 
-export default AllProgramsTags
+const seeMoreLinkStyle = {
+  padding: '6px 12px',
+  borderRadius: '8px',
+  border: '1px solid #A7C7E7',
+  backgroundColor: 'transparent',
+  color: '#A7C7E7',
+  cursor: 'pointer',
+  fontSize: '0.9rem',
+};
+
+function orderedTagEntries(tagsObj, predefinedTags = []) {
+  const seen = new Set();
+  const entries = [];
+
+  predefinedTags.forEach((tag) => {
+    if (tagsObj[tag]?.length > 0) {
+      entries.push([tag, tagsObj[tag]]);
+      seen.add(tag);
+    }
+  });
+
+  Object.keys(tagsObj)
+    .filter((tag) => !seen.has(tag) && tagsObj[tag]?.length > 0)
+    .sort((a, b) => a.localeCompare(b))
+    .forEach((tag) => {
+      entries.push([tag, tagsObj[tag]]);
+    });
+
+  return entries;
+}
+
+function ProgramCard({ program, onClick }) {
+  return (
+    <Card style={itemCardStyle} onClick={onClick}>
+      <Card.Img
+        variant="top"
+        src={getProgramImage(program)}
+        alt={program.name || 'Program image'}
+        height="300"
+        width="400"
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.src = 'https://via.placeholder.com/400x300?text=No+Image';
+        }}
+      />
+      <Card.Body>
+        <Card.Title style={{ color: '#A7C7E7' }}>
+          {program.name} by <i>{program.coach && program.coach.username}</i>
+        </Card.Title>
+        <Card.Text>
+          {program.currentRating > 0 ? (
+            <StarRatingDisplay rating={program.currentRating} />
+          ) : (
+            <span style={{ color: '#A7C7E7' }}>No ratings yet</span>
+          )}
+        </Card.Text>
+      </Card.Body>
+    </Card>
+  );
+}
+
+function TagProgramGroup({ tag, programs, onProgramClick, cardLimit, onSeeMore }) {
+  const visiblePrograms = programs.slice(0, cardLimit);
+  const hasMore = programs.length > cardLimit;
+
+  return (
+    <section>
+      <h3
+        style={{
+          color: '#A7C7E7',
+          marginBottom: '12px',
+          fontWeight: 600,
+        }}
+      >
+        {tag}
+      </h3>
+      <div style={tagGroupBoxStyle}>
+        <CardGroup>
+          <div className="cards-container">
+            {visiblePrograms.map((program, idx) => (
+              <ProgramCard
+                key={program._id || idx}
+                program={program}
+                onClick={() => onProgramClick(program)}
+              />
+            ))}
+          </div>
+        </CardGroup>
+        <div style={{ marginTop: '12px' }}>
+          {hasMore && (
+            <span style={{ color: '#A7C7E7', marginRight: '8px' }}>
+              Showing {cardLimit} of {programs.length} programs.
+            </span>
+          )}
+          <button
+            type="button"
+            style={seeMoreLinkStyle}
+            onClick={() => onSeeMore(tag)}
+          >
+            See more
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AllProgramsTags({ tags: predefinedTags = [] }) {
+  let navigate = useNavigate();
+  let [tagsProgram, setTagsProgram] = useState({});
+  let [loading, setLoading] = useState(true);
+  let [cardLimit, setCardLimit] = useState(() => getCardLimitForWidth(window.innerWidth));
+
+  useEffect(() => {
+    function updateCardLimit() {
+      setCardLimit(getCardLimitForWidth(window.innerWidth));
+    }
+
+    updateCardLimit();
+    window.addEventListener('resize', updateCardLimit);
+    return () => window.removeEventListener('resize', updateCardLimit);
+  }, []);
+
+  useEffect(() => {
+    async function fetchPrograms() {
+      setLoading(true);
+      const tagList = predefinedTags || [];
+      let tagsObj = {};
+      for (const tag of tagList) {
+        const res = await axios.get(
+          `${API_BASE_URL}/allprograms/${encodeURIComponent(tag)}`,
+          { withCredentials: true }
+        );
+        tagsObj[tag] = res.data.data || [];
+      }
+      setTagsProgram(tagsObj);
+      setLoading(false);
+    }
+    fetchPrograms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const showProgram = (program) => {
+    navigate('/showprogram', { state: program });
+  };
+
+  const seeAllForTag = (tag) => {
+    navigate(`/allprograms/tag/${encodeURIComponent(tag)}`);
+  };
+
+  const tagEntries = orderedTagEntries(tagsProgram, predefinedTags);
+  const hasPrograms = tagEntries.length > 0;
+
+  if (loading) {
+    return <p style={{ color: '#A7C7E7' }}>Loading programs…</p>;
+  }
+
+  if (!hasPrograms) {
+    return (
+      <Card style={{ border: '2px solid #A7C7E7', backgroundColor: '#161823' }}>
+        <Card.Body>
+          <Card.Title style={{ color: '#A7C7E7' }}>No programs yet</Card.Title>
+          <Card.Text style={{ color: '#f4f4f8' }}>
+            Programs will appear here grouped by tag once they are added.
+          </Card.Text>
+        </Card.Body>
+      </Card>
+    );
+  }
+
+  return (
+    <div>
+      <h2 style={{ color: '#A7C7E7', marginBottom: '20px' }}>Workout Programs by Tag</h2>
+      {tagEntries.map(([tag, programs]) => (
+        <TagProgramGroup
+          key={tag}
+          tag={tag}
+          programs={programs}
+          onProgramClick={showProgram}
+          cardLimit={cardLimit}
+          onSeeMore={seeAllForTag}
+        />
+      ))}
+    </div>
+  );
+}
+
+export default AllProgramsTags;

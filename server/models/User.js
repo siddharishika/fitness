@@ -22,20 +22,20 @@ const userSchema = new mongoose.Schema(
     },
     fileId: {
       type: String,
-      required: [true, 'A video must have a fileId'],
+      required: [true, 'A user must have a fileId'],
       
       unique: true,
       
     },
     filePath: {
       type: String,
-      required: [true, 'A video must have a path'],
+      required: [true, 'A user must have a path'],
       
       unique: true,
     },
     fileUrl: {
       type: String,
-      required: [true, 'A video must have a url'],
+      required: [true, 'A user must have a url'],
       
       unique: true,
    

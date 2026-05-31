@@ -1,239 +1,293 @@
-import React, { createElement, useEffect, useRef, useState } from "react";
-import { IconContext } from "react-icons";
+import React, { useEffect, useRef, useState } from "react";
 import { IoAddOutline } from "react-icons/io5";
-
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ButtonGroup, Container } from "react-bootstrap";
+import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
 import TagAdder from "../Utils/TagAdder";
+import { useLoginPrompt } from "../Utils/useLoginPrompt";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-var info = [];
+const submitBtnStyle = {
+  border: "2px solid #A7C7E7",
+  backgroundColor: "#161823",
+  color: "#A7C7E7",
+};
+
 function AddProgram(props) {
-  let equipment = [];
-  let typeRef = useRef();
-  let equipmentRef = useRef();
-  let containerTypeRef = useRef();
-  let nameRef = useRef();
-  let arr = [];
-  let equipmentRefContainer = useRef();
-  let noOfDaysRef = useRef();
-  const params = useParams();
-  let [selectedValue, setSelect] = useState("PLease select an option");
-  var [checked, setChecked] = useState([]);
-  let [vid, setVid] = useState([]);
-  let timeRef = useRef();
-  let descriptionRef = useRef();
-  let navigate = useNavigate();
-  const [programTags, setProgramTags] = useState(props.tags); // Example tags
+  const navigate = useNavigate();
+  const { loginModal, handleAuthResponse } = useLoginPrompt();
+
+  const nameRef = useRef();
+  const noOfDaysRef = useRef();
+  const timeRef = useRef();
+  const descriptionRef = useRef();
+  const equipmentRef = useRef();
+
+  const [selectedValue, setSelect] = useState(1);
+  const [checked, setChecked] = useState([]);
+  const [videos, setVideos] = useState([]);
+  const [equipArr, setEquipArr] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const tags = props.tags || [];
 
-  // const params=useParams();
-  function fn(res) {
-    if (
-      res.data.success == false &&
-      res.data.message == "You need to be authenticated to access this page!"
-    ) {
-      navigate("/login");
-    }
-  }
-  useEffect(
-    function () {
-      async function getVideo() {
-        let res = await axios.get(`${API_BASE_URL}/getall`, {
-          withCredentials: true,
-        });
-
-        // setVid(res.data.data);
-
-        fn(res);
-        if (res.data.data) {
-          for (let i = 0; i < res.data.data.length; i++) {
-            let x = res.data.data[i];
-            // let {username}=coach;
-            // arr=tags;
-            let ax = [...vid, x];
-            setVid(ax);
-          }
+  useEffect(() => {
+    async function loadVideos() {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/getall`, { withCredentials: true });
+        if (handleAuthResponse(res, { redirect: true })) {
+          return;
         }
-
-        info = res.data.data;
+        setVideos(res.data.data || []);
+      } catch (e) {
+        handleAuthResponse(e, { redirect: true });
+      } finally {
+        setLoading(false);
       }
-      getVideo();
-    },
-    [params]
-  );
+    }
+    loadVideos();
+  }, []);
 
-  const handlePlus1 = (e) => {
-    e.preventDefault();
-    arr = [...arr, typeRef.current.value];
-    let li = document.createElement("li");
-    li.innerHTML = typeRef.current.value;
-    containerTypeRef.current.appendChild(li);
-  };
   const handlePlus2 = (e) => {
     e.preventDefault();
-    equipment = [...equipment, equipmentRef.current.value];
-    let li = document.createElement("li");
-    li.innerHTML = equipmentRef.current.value;
-    equipmentRefContainer.current.appendChild(li);
+    const value = equipmentRef.current?.value?.trim();
+    if (value) {
+      setEquipArr((prev) => [...prev, value]);
+      equipmentRef.current.value = "";
+    }
+  };
+
+  const handleMinus2 = (idx) => {
+    setEquipArr((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleDays = (e) => {
-    let days = e.target.value;
-    if (days < 0) {
-      return;
-    }
-    let arr2 = [];
-    for (let i = 0; i < vid.length; i++) {
-      arr2[i] = false;
-    }
+    const days = Number(e.target.value);
+    if (days < 1) return;
 
-    let array = [];
-    let dropDown = document.getElementById("dropdownButton");
-    for (let i = 0; i < dropDown.length; i++) {
-      dropDown.removeChild(dropDown[i]);
-    }
-    for (let i = 0; i < days; i++) {
-      let naya = document.createElement("option");
-      naya.innerHTML = i + 1;
-      naya.setAttribute("value", i + 1);
-      let dropDown = document.getElementById("dropdownButton");
-      dropDown.appendChild(naya);
-
-      array = [...array, arr2];
-    }
-
-    setChecked(array);
+    setChecked((prev) => {
+      if (days > prev.length) {
+        const emptyRow = videos.map(() => false);
+        return [...prev, ...Array(days - prev.length).fill(null).map(() => [...emptyRow])];
+      }
+      if (days < prev.length) {
+        return prev.slice(0, days);
+      }
+      return prev;
+    });
     setSelect(1);
   };
+
   const handleSelect = (e) => {
-    setSelect(e.target.value);
+    setSelect(Number(e.target.value));
   };
-  const handleChange = (e) => {
-    let x = e.target.attributes.i.value;
-    let check = [];
-    for (let i = 0; i < checked.length; i++) {
-      check.push([]);
-      for (let j = 0; j < checked[i].length; j++) {
-        if (i == selectedValue - 1 && j == x) {
-          let dummy = checked[i][j];
-          check[i].push(!dummy);
-        } else {
-          check[i].push(checked[i][j]);
-        }
-      }
-    }
-    setChecked(check);
+
+  const handleChange = (videoIdx) => {
+    const dayIdx = selectedValue - 1;
+    setChecked((prev) =>
+      prev.map((day, i) =>
+        i === dayIdx
+          ? day.map((val, j) => (j === videoIdx ? !val : val))
+          : day
+      )
+    );
   };
+
+  const handleTagsChange = (tagList) => {
+    setSelectedTags(tagList);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let data = {};
-    data.name = nameRef.current.value;
-    data.numberOfDays = noOfDaysRef.current.value;
-    data.schedule = checked;
-    data.equipment = equipment;
-    data.typeOfProgram = arr;
-    data.tags = selectedTags.join(",");
-    data.description = descriptionRef.current.value;
-    data.timePerDay = timeRef.current.value;
+    const data = {
+      name: nameRef.current.value,
+      numberOfDays: noOfDaysRef.current.value,
+      schedule: checked,
+      equipment: equipArr,
+      typeOfProgram: [],
+      tags: selectedTags.join(","),
+      description: descriptionRef.current.value,
+      timePerDay: timeRef.current.value,
+    };
     try {
-      let res = await axios.post(`${API_BASE_URL}/addprogram`, data, {
+      const res = await axios.post(`${API_BASE_URL}/addprogram`, data, {
         withCredentials: true,
       });
-      navigate("/allprograms");
-    } catch (e) {
-      console.log(e, "Nahi ho payega");
+      if (handleAuthResponse(res, { redirect: true })) {
+        return;
+      }
+      navigate("/");
+    } catch (err) {
+      if (handleAuthResponse(err, { redirect: true })) {
+        return;
+      }
+      console.log(err, "Nahi ho payega");
     }
   };
 
-  const handleTagsChange = (tags) => {
-    setSelectedTags(tags);
-    console.log("Selected Tags:", tags);
-  };
+  if (loading) {
+    return (
+      <Container className="p-4 border rounded text-center">
+        <p style={{ color: "#A7C7E7" }}>Loading your videos…</p>
+      </Container>
+    );
+  }
+
+  const dayIndex = selectedValue - 1;
 
   return (
-    <form method="POST" onSubmit={handleSubmit}>
-      <label htmlFor="name">Name of the Program</label>
-      <input type="text" ref={nameRef} />
-      <label htmlFor="noOfDays">Number of Days</label>
-      <input
-        type="number"
-        ref={noOfDaysRef}
-        name="numberOfDays"
-        onChange={handleDays}
-      />
-      <select
-        id="dropdownButton"
-        value={selectedValue}
-        onChange={handleSelect}
-      ></select>
-      <br />
-      <div>
-        {vid.length > 0 &&
-          checked.length > 0 &&
-          vid.map((ele, idx) => {
-            return (
-              <div key={idx}>
-                <h1>{ele.name}</h1>
+    <>
+      <div className="mx-auto">
+        <Container className="p-4 border rounded">
+          <Form onSubmit={handleSubmit} method="POST">
+            <div className="text-center mb-4">
+              <h2 style={{ color: "#A7C7E7" }}>Add your program here!</h2>
+            </div>
 
-                <img src={ele.imgFileUrl} alt="" height="300" width="400" />
-                <p>{checked[selectedValue - 1]}</p>
-                {checked[selectedValue - 1] && (
-                  <input
-                    i={idx}
-                    type="checkbox"
-                    checked={checked.at(selectedValue - 1).at(idx)}
-                    onChange={handleChange}
+            <Form.Group className="mb-3" controlId="programName">
+              <Form.Label>Program Name</Form.Label>
+              <Form.Control
+                type="text"
+                ref={nameRef}
+                placeholder="Enter program name"
+                required
+              />
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3" controlId="timePerDay">
+                  <Form.Label>Time Per Day (minutes)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    ref={timeRef}
+                    min={0}
+                    placeholder="0"
+                    required
                   />
-                )}
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3" controlId="description">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                ref={descriptionRef}
+                placeholder="Describe your program"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Tags</Form.Label>
+              <TagAdder tags={tags} onTagsChange={handleTagsChange} />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Equipment</Form.Label>
+              <div className="d-flex gap-2 mb-2">
+                <Form.Control type="text" ref={equipmentRef} placeholder="Add equipment" />
+                <Button variant="light" style={submitBtnStyle} onClick={handlePlus2} type="button">
+                  <IoAddOutline />
+                </Button>
               </div>
-            );
-          })}
-        {/* <input type="checkbox"  
-            // checked={checked}
-            // onChange={handleChange}
-            /> */}
+              <ul className="list-unstyled mb-0">
+                {equipArr.map((item, idx) => (
+                  <li key={idx} className="d-flex align-items-center gap-2 mb-1">
+                    <span>{item}</span>
+                    <Button
+                      variant="link"
+                      className="text-danger p-0"
+                      type="button"
+                      onClick={() => handleMinus2(idx)}
+                    >
+                      Remove
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Number of Days</Form.Label>
+              <Form.Control
+                type="number"
+                ref={noOfDaysRef}
+                name="numberOfDays"
+                min={1}
+                onChange={handleDays}
+                className="mb-3"
+                required
+              />
+              <Form.Label>Workout Schedule</Form.Label>
+              <Form.Select
+                id="dropdownButton"
+                value={selectedValue}
+                onChange={handleSelect}
+                className="mb-3"
+                disabled={checked.length === 0}
+              >
+                {checked.map((_, idx) => (
+                  <option key={idx} value={idx + 1}>
+                    Day {idx + 1}
+                  </option>
+                ))}
+              </Form.Select>
+
+              {videos.length > 0 && checked.length > 0 && (
+                <Row className="g-3">
+                  {videos.map((video, idx) => (
+                    <Col key={video._id || idx} xs={12} md={6} lg={4}>
+                      <Card
+                        style={{
+                          border: "2px solid #A7C7E7",
+                          borderRadius: "10px",
+                          backgroundColor: "#161823",
+                        }}
+                      >
+                        <Card.Img
+                          variant="top"
+                          src={video.imgFileUrl}
+                          alt={video.name}
+                          style={{ height: "160px", objectFit: "cover" }}
+                        />
+                        <Card.Body>
+                          <Card.Title style={{ color: "#A7C7E7", fontSize: "1rem" }}>
+                            {video.name}
+                          </Card.Title>
+                          <Form.Check
+                            type="checkbox"
+                            style={{ color: "#A7C7E7" }}
+                            id={`add-video-day-${dayIndex}-${idx}`}
+                            label="Include on this day"
+                            checked={!!checked[dayIndex]?.[idx]}
+                            onChange={() => handleChange(idx)}
+                          />
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              )}
+
+              {videos.length === 0 && (
+                <p style={{ color: "#A7C7E7" }}>
+                  Upload workout videos first to build your program schedule.
+                </p>
+              )}
+            </Form.Group>
+
+            <Button variant="light" style={submitBtnStyle} type="submit" className="w-100">
+              Submit
+            </Button>
+          </Form>
+        </Container>
       </div>
-      <label htmlFor="type">Type</label>
-
-      <input type="text" ref={typeRef} />
-
-      <IconContext.Provider
-        value={{ color: "black", className: "global-class-name" }}
-      >
-        <div className="plus" id="plus">
-          <IoAddOutline onClick={handlePlus1} style={{ cursor: "pointer" }} />
-        </div>
-      </IconContext.Provider>
-      <ul ref={containerTypeRef} id="typeOfWorkout"></ul>
-      <label htmlFor="equipment">Equipment</label>
-      <input type="text" ref={equipmentRef} />
-      <IconContext.Provider
-        value={{ color: "black", className: "global-class-name" }}
-      >
-        <div className="plus">
-          <IoAddOutline onClick={handlePlus1} style={{ cursor: "pointer" }} />
-        </div>
-      </IconContext.Provider>
-      <ul ref={equipmentRefContainer}>{}</ul>
-      <label htmlFor="">timePerDay</label>
-      <input type="number" ref={timeRef} />
-      <h3>Tags</h3>
-      <TagAdder tags={programTags} onTagsChange={handleTagsChange} />
-
-      <label htmlFor="description">Description</label>
-      <textarea
-        name="descrition"
-        ref={descriptionRef}
-        id=""
-        cols="30"
-        rows="10"
-      ></textarea>
-      <button type="submit">Add Program</button>
-    </form>
+      {loginModal}
+    </>
   );
 }
 

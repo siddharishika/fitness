@@ -32,15 +32,15 @@ const programSchema = new mongoose.Schema(
         required: [true, 'A video must have a name'],
         trim: true,
         unique: true,
-        minLength: [3, 'video name must be more that 3 characters'],
-        maxLength: [30, 'video name must be at most 30 characters'],
+        minLength: [3, 'program name must be more that 3 characters'],
+        maxLength: [30, 'program name must be at most 30 characters'],
       }],
     equipment: [{
         type: String,
         trim: true,
         unique: true,
-        minLength: [3, 'video name must be more that 3 characters'],
-        maxLength: [30, 'video name must be at most 30 characters'],
+        minLength: [3, 'equipment name must be more that 3 characters'],
+        maxLength: [30, 'equipment name must be at most 30 characters'],
       }],
     schedule:[ [{
       type: mongoose.Schema.ObjectId,
@@ -55,13 +55,13 @@ const programSchema = new mongoose.Schema(
         type: String,
         trim: true,
         unique: true,
-        minLength: [3, 'video name must be more that 3 characters'],
-        maxLength: [300, 'video name must be at most 30 characters'],
+        minLength: [3, 'program description must be more that 3 characters'],
+        maxLength: [300, 'program description must be at most 300 characters'],
       },
       coach: {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
-        required: [true, 'A video must belong to an coach'],
+        required: [true, 'A program must belong to an coach'],
       },
        rating: [
             {

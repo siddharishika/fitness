@@ -1,318 +1,343 @@
-import React, { createElement, useEffect, useRef, useState } from "react";
-import { IconContext } from "react-icons";
+import React, { useEffect, useRef, useState } from "react";
 import { IoAddOutline } from "react-icons/io5";
-
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
+import TagAdderEdit from "../Utils/TagAdderEdit";
+import { useLoginPrompt } from "../Utils/useLoginPrompt";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-var info = [];
-function EditProgram() {
-  let location = useLocation();
-  let data = location.state;
-  let equipment = [];
-  let typeRef = useRef();
-  let equipmentRef = useRef();
-  let containerTypeRef = useRef();
-  let nameRef = useRef();
-  let arr = [];
-  let equipmentRefContainer = useRef();
-  let noOfDaysRef = useRef();
-  const params = useParams();
-  let [selectedValue, setSelect] = useState(1);
-  var [checked, setChecked] = useState(data.schedule);
-  let [vid, setVid] = useState([]);
-  let [vid2, setVid2] = useState({});
-  let timeRef = useRef();
-  let descriptionRef = useRef();
-  let navigate = useNavigate();
-  let [typeArr, setTypeArr] = useState(data.typeOfProgram);
-  let [equipArr, setEquipArr] = useState(data.equipment);
-  // const params=useParams();
-  function fn(res) {
-    if (
-      res.data.success == false &&
-      res.data.message == "You need to be authenticated to access this page!"
-    ) {
-      navigate("/login");
-    }
+const submitBtnStyle = {
+  border: "2px solid #A7C7E7",
+  backgroundColor: "#161823",
+  color: "#A7C7E7",
+};
+
+function normalizeTags(value) {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (typeof value === "string" && value.trim()) {
+    return value.split(",").map((t) => t.trim()).filter(Boolean);
   }
-  useEffect(
-    function () {
-      async function getVideo() {
-        let res = await axios.get(`${API_BASE_URL}/getall`, {
-          withCredentials: true,
-        });
-        // setVid(res.data.data);
-        fn(res);
-        let ax2 = {};
-        let ax = [];
-        if (res.data.data) {
-          for (let i = 0; i < res.data.data.length; i++) {
-            let x = res.data.data[i];
-            // let {username}=coach;
-            // arr=tags;
+  return [];
+}
 
-            ax2 = { ...ax2 };
-            ax2[x._id] = x;
-            ax = [...ax];
-            ax[i] = x;
-          }
-          setVid(ax);
-          setVid2(ax2);
-          let arr = [];
-          let max = 0;
-          for (let check = 0; check < data.schedule.length; check++) {
-            if (max < data.schedule[check].length) {
-              max = data.schedule[check].length;
-            }
-          }
-          for (let day = 0; day < data.schedule.length; day++) {
-            arr.push([]);
-            for (let j = 0; j < max; j++) {
-              if (data.schedule[day][j]) {
-                arr[day].push(true);
-              } else {
-                arr[day].push(false);
-              }
-            }
-          }
-          setChecked(arr);
-          // setChecked(data.schedule);
-          setSelect(1);
-        }
-      }
-      getVideo();
-    },
-    [params]
+function getDayVideoIds(day) {
+  if (!Array.isArray(day)) return new Set();
+  return new Set(
+    day.map((entry) => {
+      if (entry && typeof entry === "object" && entry._id) return String(entry._id);
+      return String(entry);
+    })
   );
+}
 
-  const handlePlus1 = (e) => {
-    e.preventDefault();
-    let arr = [...typeArr];
-    arr.push(typeRef.current.value);
-    setTypeArr(arr);
-    // arr=[...arr,typeRef.current.value]
-    // let li=document.createElement('li');
-    // li.innerHTML=typeRef.current.value;
-    // containerTypeRef.current.appendChild(li);
-  };
+function buildScheduleChecked(fitnessVideos, programSchedule, numDays) {
+  const schedule = programSchedule || [];
+  const arr = [];
+  for (let i = 0; i < numDays; i++) {
+    const dayIds = getDayVideoIds(schedule[i]);
+    const row = fitnessVideos.map((video) => dayIds.has(String(video._id)));
+    arr.push(row);
+  }
+  return arr;
+}
+
+function EditProgram(props) {
+  const location = useLocation();
+  const data = location.state || {};
+  const navigate = useNavigate();
+  const { loginModal, handleAuthResponse } = useLoginPrompt();
+
+  const nameRef = useRef(data.name || "");
+  const noOfDaysRef = useRef(data.numberOfDays || 1);
+  const timeRef = useRef(data.timePerDay || 0);
+  const descriptionRef = useRef(data.description || "");
+  const equipmentRef = useRef();
+
+  const [selectedValue, setSelect] = useState(1);
+  const [checked, setChecked] = useState([]);
+  const [videos, setVideos] = useState([]);
+  const [equipArr, setEquipArr] = useState(data.equipment || []);
+  const [selectedTags, setSelectedTags] = useState(() => normalizeTags(data.tags));
+  const [loading, setLoading] = useState(true);
+  const tags = props.tags || [];
+
+  useEffect(() => {
+    async function loadVideos() {
+      if (!data._id) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await axios.get(`${API_BASE_URL}/getall`, { withCredentials: true });
+        if (handleAuthResponse(res, { redirect: true })) {
+          return;
+        }
+        const fitnessVideos = res.data.data || [];
+        setVideos(fitnessVideos);
+        const numDays = Number(data.numberOfDays) || 1;
+        setChecked(buildScheduleChecked(fitnessVideos, data.schedule, numDays));
+        setSelect(1);
+      } catch (e) {
+        handleAuthResponse(e, { redirect: true });
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadVideos();
+  }, [data._id]);
+
   const handlePlus2 = (e) => {
     e.preventDefault();
-    let arr = [...equipArr];
-    arr.push(equipmentRef.current.value);
-    setEquipArr(arr);
-    // equipment=[...equipment,equipmentRef.current.value]
-    // let li=document.createElement('li');
-    // li.innerHTML=equipmentRef.current.value;
-    // equipmentRefContainer.current.appendChild(li);
+    const value = equipmentRef.current?.value?.trim();
+    if (value) {
+      setEquipArr((prev) => [...prev, value]);
+      equipmentRef.current.value = "";
+    }
   };
-  const handleMinus1 = (idx) => {
-    let arr = [];
-    for (let i = 0; i < idx; i++) {
-      if (i != idx) {
-        arr.push(typeArr[i]);
-      }
-    }
-    setTypeArr(arr);
-  };
-  const handleMinus2 = (idx) => {
-    let arr = [];
-    for (let i = 0; i < idx; i++) {
-      if (i != idx) {
-        arr.push(typeArr[i]);
-      }
-    }
-    setEquipArr(arr);
-  };
-  const handleDays = (e) => {
-    let days = e.target.value;
-    let array = [];
-    if (days < 0) {
-      return;
-    }
-    if (days > checked.length) {
-      let arr2 = [];
-      for (let i = 0; i < vid.length; i++) {
-        arr2[i] = false;
-      }
-      array = [...checked];
-      // let dropDown=document.getElementById('dropdownButton');
-      // for(let i=0;i<dropDown.length;i++){
-      //     dropDown.removeChild(dropDown[i]);
-      // }
-      for (let i = checked.length; i < days; i++) {
-        // let naya=document.createElement('option');
-        // naya.innerHTML=i+1;
-        // naya.setAttribute('value', i+1);
-        // let dropDown=document.getElementById('dropdownButton');
-        // dropDown.appendChild(naya);
-        array = [...array, arr2];
-      }
-    } else if (days < checked.length) {
-      // let dropDown=document.getElementById('dropdownButton');
-      // for(let i=0;i<dropDown.length;i++){
-      //     dropDown.removeChild(dropDown[i]);
-      // }
-      for (let i = 0; i < days; i++) {
-        // let naya=document.createElement('option');
-        // naya.innerHTML=i+1;
-        // naya.setAttribute('value', i+1);
-        // let dropDown=document.getElementById('dropdownButton');
-        // dropDown.appendChild(naya);
-        array.push(checked[i]);
-      }
-    } else {
-      return;
-    }
 
-    setChecked(array);
+  const handleMinus2 = (idx) => {
+    setEquipArr((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleDays = (e) => {
+    const days = Number(e.target.value);
+    if (days < 1) return;
+
+    setChecked((prev) => {
+      if (days > prev.length) {
+        const emptyRow = videos.map(() => false);
+        return [...prev, ...Array(days - prev.length).fill(null).map(() => [...emptyRow])];
+      }
+      if (days < prev.length) {
+        return prev.slice(0, days);
+      }
+      return prev;
+    });
     setSelect(1);
   };
+
   const handleSelect = (e) => {
-    setSelect(e.target.value);
+    setSelect(Number(e.target.value));
   };
-  const handleChange = (e) => {
-    let x = e.target.attributes.i.value;
-    let check = [];
-    for (let i = 0; i < checked.length; i++) {
-      check.push([]);
-      for (let j = 0; j < checked[i].length; j++) {
-        if (i == selectedValue - 1 && j == x) {
-          let dummy = checked[i][j];
-          check[i].push(!dummy);
-        } else {
-          check[i].push(checked[i][j]);
-        }
-      }
-    }
-    setChecked(check);
+
+  const handleChange = (videoIdx) => {
+    const dayIdx = selectedValue - 1;
+    setChecked((prev) =>
+      prev.map((day, i) =>
+        i === dayIdx
+          ? day.map((val, j) => (j === videoIdx ? !val : val))
+          : day
+      )
+    );
   };
+
+  const handleTagsChange = (tags) => {
+    setSelectedTags(tags);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let data2 = {};
-    data2.id = data._id;
-    data2.name = nameRef.current.value;
-    data2.numberOfDays = noOfDaysRef.current.value;
-    data2.schedule = checked;
-    data2.equipment = equipArr;
-    data2.typeOfProgram = typeArr;
-    data2.description = descriptionRef.current.value;
-    data2.timePerDay = timeRef.current.value;
+    const payload = {
+      id: data._id,
+      name: nameRef.current.value,
+      numberOfDays: noOfDaysRef.current.value,
+      schedule: checked,
+      equipment: equipArr,
+      typeOfProgram: data.typeOfProgram || [],
+      description: descriptionRef.current.value,
+      timePerDay: timeRef.current.value,
+      tags: selectedTags,
+    };
     try {
-      let res = await axios.patch(`${API_BASE_URL}/editprogram`, data2, {
+      const res = await axios.patch(`${API_BASE_URL}/editprogram`, payload, {
         withCredentials: true,
       });
-      fn(res);
-    } catch (e) {
-      console.log(e, "Nahi ho payega");
+      if (handleAuthResponse(res, { redirect: true })) {
+        return;
+      }
+      navigate("/showprogram", {
+        state: { ...data, ...payload, tags: selectedTags },
+      });
+    } catch (err) {
+      if (handleAuthResponse(err, { redirect: true })) {
+        return;
+      }
+      console.log(err, "Nahi ho payega");
     }
   };
 
+  if (!data._id) {
+    return (
+      <Container className="p-4 border rounded text-center">
+        <p style={{ color: "#A7C7E7" }}>No program selected. Open a program and choose Edit.</p>
+      </Container>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Container className="p-4 border rounded text-center">
+        <p style={{ color: "#A7C7E7" }}>Loading program…</p>
+      </Container>
+    );
+  }
+
+  const dayIndex = selectedValue - 1;
+
   return (
-    <form method="POST" onSubmit={handleSubmit}>
-      <label htmlFor="name">Name of the Program</label>
-      <input type="text" ref={nameRef} defaultValue={data.name} />
-      <label htmlFor="noOfDays">Number of Days</label>
-      <input
-        type="number"
-        ref={noOfDaysRef}
-        name="numberOfDays"
-        defaultValue={data.numberOfDays}
-        onChange={handleDays}
-      />
-      <select id="dropdownButton" value={selectedValue} onChange={handleSelect}>
-        {checked &&
-          checked.map((ele, idx) => {
-            return (
-              <option key={idx} value={idx + 1}>
-                {idx + 1}
-              </option>
-            );
-          })}
-      </select>
-      <br />
-      <div>
-        {vid &&
-          checked.length > 0 &&
-          vid.map((ele, idx) => {
-            return (
-              <div key={idx}>
-                <h1>{ele.name}</h1>
+    <>
+      <div className="mx-auto">
+        <Container className="p-4 border rounded">
+          <Form onSubmit={handleSubmit} method="POST">
+            <div className="text-center mb-4">
+              <h2 style={{ color: "#A7C7E7" }}>Edit your program here!</h2>
+            </div>
 
-                <img src={ele.imgFileUrl} alt="" height="300" width="400" />
-                <p>{checked[selectedValue - 1]}</p>
-                {checked[selectedValue - 1] && (
-                  <input
-                    i={idx}
-                    type="checkbox"
-                    checked={checked.at(selectedValue - 1).at(idx)}
-                    onChange={handleChange}
+            <Form.Group className="mb-3" controlId="programName">
+              <Form.Label>Program Name</Form.Label>
+              <Form.Control
+                type="text"
+                ref={nameRef}
+                defaultValue={data.name}
+                placeholder="Enter program name"
+                required
+              />
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3" controlId="timePerDay">
+                  <Form.Label>Time Per Day (minutes)</Form.Label>
+                  <Form.Control
+                    type="number"
+                    ref={timeRef}
+                    min={0}
+                    defaultValue={data.timePerDay}
+                    required
                   />
-                )}
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3" controlId="description">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                ref={descriptionRef}
+                defaultValue={data.description}
+                placeholder="Describe your program"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Tags</Form.Label>
+              <TagAdderEdit
+                tags={tags}
+                initialSelectedTags={normalizeTags(data.tags)}
+                onTagsChange={handleTagsChange}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Equipment</Form.Label>
+              <div className="d-flex gap-2 mb-2">
+                <Form.Control type="text" ref={equipmentRef} placeholder="Add equipment" />
+                <Button variant="light" style={submitBtnStyle} onClick={handlePlus2} type="button">
+                  <IoAddOutline />
+                </Button>
               </div>
-            );
-          })}
-        {/* <input type="checkbox"  
-            // checked={checked}
-            // onChange={handleChange}
-            /> */}
+              <ul className="list-unstyled mb-0">
+                {equipArr.map((item, idx) => (
+                  <li key={idx} className="d-flex align-items-center gap-2 mb-1">
+                    <span>{item}</span>
+                    <Button
+                      variant="link"
+                      className="text-danger p-0"
+                      type="button"
+                      onClick={() => handleMinus2(idx)}
+                    >
+                      Remove
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Number of Days</Form.Label>
+              <Form.Control
+                type="number"
+                ref={noOfDaysRef}
+                name="numberOfDays"
+                min={1}
+                defaultValue={data.numberOfDays}
+                onChange={handleDays}
+                className="mb-3"
+                required
+              />
+              <Form.Label>Workout Schedule</Form.Label>
+              <Form.Select
+                id="dropdownButton"
+                value={selectedValue}
+                onChange={handleSelect}
+                className="mb-3"
+              >
+                {checked.map((_, idx) => (
+                  <option key={idx} value={idx + 1}>
+                    Day {idx + 1}
+                  </option>
+                ))}
+              </Form.Select>
+
+              {videos.length > 0 && checked.length > 0 && (
+                <Row className="g-3">
+                  {videos.map((video, idx) => (
+                    <Col key={video._id || idx} xs={12} md={6} lg={4}>
+                      <Card
+                        style={{
+                          border: "2px solid #A7C7E7",
+                          borderRadius: "10px",
+                          backgroundColor: "#161823",
+                        }}
+                      >
+                        <Card.Img
+                          variant="top"
+                          src={video.imgFileUrl}
+                          alt={video.name}
+                          style={{ height: "160px", objectFit: "cover" }}
+                        />
+                        <Card.Body>
+                          <Card.Title style={{ color: "#A7C7E7", fontSize: "1rem" }}>
+                            {video.name}
+                          </Card.Title>
+                          <Form.Check
+                            type="checkbox"
+                            style={{ color: "#A7C7E7" }}
+                            id={`video-day-${dayIndex}-${idx}`}
+                            label="Include on this day"
+                            checked={!!checked[dayIndex]?.[idx]}
+                            onChange={() => handleChange(idx)}
+                          />
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              )}
+            </Form.Group>
+
+            <Button variant="light" style={submitBtnStyle} type="submit" className="w-100">
+              Submit
+            </Button>
+          </Form>
+        </Container>
       </div>
-      <label htmlFor="type">Type</label>
-
-      <input type="text" ref={typeRef} />
-
-      <IconContext.Provider
-        value={{ color: "black", className: "global-class-name" }}
-      >
-        <div className="plus" id="plus">
-          <IoAddOutline onClick={handlePlus1} />
-        </div>
-      </IconContext.Provider>
-      <ul ref={containerTypeRef} id="typeOfWorkout">
-        {typeArr && typeArr.map((ele, idx) => {
-          return (
-            <li key={idx}>
-              <h5>{ele}</h5>
-              <h5 onClick={(e) => handleMinus1(idx)}>-</h5>
-            </li>
-          );
-        })}
-      </ul>
-      <label htmlFor="equipment">Equipment</label>
-      <input type="text" ref={equipmentRef} />
-      <IconContext.Provider
-        value={{ color: "black", className: "global-class-name" }}
-      >
-        <div className="plus">
-          <IoAddOutline onClick={handlePlus2} />
-        </div>
-      </IconContext.Provider>
-      <ul ref={equipmentRefContainer}>
-        {equipArr && equipArr.map((ele, idx) => {
-          return (
-            <li key={idx}>
-              <h5>{ele}</h5>
-              <h5 onClick={(e) => handleMinus2(idx)}>-</h5>
-            </li>
-          );
-        })}
-      </ul>
-      <label htmlFor="">timePerDay</label>
-      <input type="number" defaultValue={data.timePerDay} ref={timeRef} />
-      <label htmlFor="description">Description</label>
-      <textarea
-        name="descrition"
-        ref={descriptionRef}
-        defaultValue={data.description}
-        id=""
-        cols="30"
-        rows="10"
-      ></textarea>
-      <button type="submit">Edit Program</button>
-    </form>
+      {loginModal}
+    </>
   );
 }
 

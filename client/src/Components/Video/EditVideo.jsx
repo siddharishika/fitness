@@ -1,164 +1,225 @@
 import axios from 'axios';
- 
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Container, Form } from 'react-bootstrap';
-import { IconContext } from 'react-icons';
-import { IoAddOutline, IoRemoveCircleOutline } from 'react-icons/io5';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import TagAdder from '../Utils/TagAdder';
+import { useLocation, useNavigate } from 'react-router-dom';
 import TagAdderEdit from '../Utils/TagAdderEdit';
+import { useLoginPrompt } from '../Utils/useLoginPrompt';
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
-var file={};
-var imgFile={};
-// var arr=[];
-var arr2=[];
-function EditVideo(props) {
-   let containerRef=useRef();
-    let location=useLocation();
-    let data=location.state;
-    let fileRef=useRef();
-    let imgFileRef=useRef();
-    let tagRef=useRef();
-    let navigate=useNavigate();
-    let [tagsList, setTagsList] = useState({});
-    let [selectedTags, setSelectedTags] = useState(data.tags || [] );
-    let [selectedTagsChecked, setSelectedTagsChecked] = useState({});
-    let [vid , setVid]=useState({_id:"", name:"",fileId:"", fileUrl:""
-    , filePath:"", imgFileId:"",imgFilePath:"",imgFileUrl:"" , tags:[],coach:{}});
-    const [tags, setVideoTags] = useState(props.tags);
-      useEffect(() => {
-      props.tags.forEach((tag) => {
-        setSelectedTagsChecked((prev) => ({ ...prev, [tag]: data.tags.includes(tag) }));
-      });
-    }, [props.tags, selectedTags]);
-    let x=vid.tags;
-    let nameRef=useRef(vid.name);
-    // setArr(x);
-    let info={};
-    function fn(res){
-        if(res.data.success==false && res.data.message=="You are not author of this video"){
-            navigate('/signup');
-        }
-    }
-    const handleSubmit=async(e)=>{
-        e.preventDefault();
-        arr = [...arr, ...Object.keys(tagsList).filter((tag) => tagsList[tag])];
-        let f=fileRef.current.value;
-        let imgf=imgFileRef.current.value;
-        let b1=arr==data.tags;
-        let b2=nameRef.current.value==data.name;
-        if(f || imgf || !b1 || !b2){
-            try{
-                let form=document.querySelector("form");
-                let formData=new FormData(form);
-                formData.append('tags' , arr.join(","));
-                formData.append('id' , vid._id);
-                // let x=formData.get('file');
-                // formData.append("file",file);
-                let info=Object.fromEntries(formData);
-                if(f && imgf){
-                    let res1 = await axios.delete(
-                      `${API_BASE_URL}/delete/${vid._id}`,
-                      { withCredentials: true }
-                    );
-                    let res = await axios.post(
-                      `${API_BASE_URL}/add/`,
-                      formData,
-                      { withCredentials: true }
-                    );
-                    fn(res);
-                }
-                if(f && !imgf){
-                    let res = await axios.patch(
-                      `${API_BASE_URL}/edit/f/${vid._id}`,
-                      formData,
-                      { withCredentials: true }
-                    );
-                    fn(res);
-                }
-                if(imgf && !f){
-                    let res = await axios.patch(
-                      `${API_BASE_URL}/edit/imgf/${vid._id}`,
-                      formData,
-                      { withCredentials: true }
-                    );
-                    fn(res);
-                }
-                else if(!imgf && !f && (b1 || b2)){
-                    let res = await axios.patch(
-                      `${API_BASE_URL}/edit/${vid._id}`,
-                      formData,
-                      { withCredentials: true }
-                    );
-                    fn(res);
-                }
-                
-            }catch(e){
-                console.log(e,"Nahi ho payega")
-            }  
-        }else{
-            console.log("Please edit first");
-        }
-        
-    }
 
-    const handleTagsChange = (tags) => {
-    setSelectedTags(tags);
-    console.log("Selected Tags:", tags);
-  };
-    const handleFileChange=(e)=>{
-        file=e.target.files[0];
-        
-      }
-      const handleFileChange2=(e)=>{
-        imgFile=e.target.files[0];
-        
-      }
-    
-  return (
-    <div>
-      <div className='mx-auto'> 
-            <Container className="p-4 border rounded">
-            <Form onSubmit={handleSubmit} encType="multipart/form-data" method="POST">
-            {/* <form onSubmit={handleSubmit} encType="multipart/form-data" method="POST"> */}
-              <div className="text-center mb-4">
-                <h2>Edit your video here!</h2>
-              </div>
-              <Form.Group className="mb-3" controlId="formGridTitle">
-                <Form.Label>Video Title</Form.Label>
-                <Form.Control type="text" placeholder="Enter video title" name="name" ref={nameRef} defaultValue={data.name} required/>
-              </Form.Group>
-              <TagAdderEdit tags={tags} onTagsChange={handleTagsChange} selectedTagsChecked={selectedTagsChecked} />
-              {/* <ul >
-                {selectedTags && selectedTags.map(function (ele, idx) {
-                  return <li key={idx}>{ele}</li>;
-                })}
-              </ul> */}
-              {/* <TagAdder tags={tags} onTagsChange={handleTagsChange} /> */}
-              {/* <ul ref={tagRef}>
-                {arr && arr.map(function (ele, idx) {
-                  return <li key={idx}>{ele}</li>;
-                })}
-              </ul> */}
-              <Form.Group controlId="formFileLg" className="mb-3">
-                <Form.Label>If you want to change video, please select video</Form.Label>
-                <Form.Control type="file" name='file'  ref={fileRef}  onChange={handleFileChange} accept="video/*" size="lg" />
-              </Form.Group>
-              <Form.Group controlId="formFileLg" className="mb-3">
-                <Form.Label>If you want to change image, please select image</Form.Label>
-                <Form.Control type="file" name='imgFile' ref={imgFileRef} onChange={handleFileChange2} accept="image/*" size="lg" />
-              </Form.Group>
-              <Button variant="primary" type="submit" className='w-100'>
-              Submit
-              </Button>
-              {/* <button type="submit">Submit</button> */}
-            {/* </form> */}
-            </Form>
-            </Container>
-          </div>
-    </div>
-  )
+const submitBtnStyle = {
+  border: "2px solid #A7C7E7",
+  backgroundColor: "#161823",
+  color: "#A7C7E7",
+};
+
+function normalizeTags(value) {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (typeof value === "string" && value.trim()) {
+    return value.split(",").map((t) => t.trim()).filter(Boolean);
+  }
+  return [];
 }
 
-export default EditVideo
+function tagsEqual(a, b) {
+  const left = normalizeTags(a).slice().sort().join(",");
+  const right = normalizeTags(b).slice().sort().join(",");
+  return left === right;
+}
+
+function EditVideo(props) {
+  const location = useLocation();
+  const initialData = location.state || {};
+  const fileRef = useRef();
+  const imgFileRef = useRef();
+  const navigate = useNavigate();
+  const { loginModal, handleAuthResponse } = useLoginPrompt();
+
+  const [video, setVideo] = useState(initialData);
+  const [selectedTags, setSelectedTags] = useState(() => normalizeTags(initialData.tags));
+  const [loading, setLoading] = useState(!!initialData._id);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const nameRef = useRef(initialData.name || "");
+  const tags = props.tags || [];
+
+  useEffect(() => {
+    async function loadVideo() {
+      if (!initialData._id) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await axios.get(`${API_BASE_URL}/show/${initialData._id}`, {
+          withCredentials: true,
+        });
+        const data = res.data.data;
+        setVideo(data);
+        setSelectedTags(normalizeTags(data.tags));
+      } catch (e) {
+        handleAuthResponse(e, { redirect: true });
+        setError("Could not load video. Open it from your videos and try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadVideo();
+  }, [initialData._id]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    const videoId = video._id;
+    if (!videoId) {
+      setError("No video selected.");
+      return;
+    }
+
+    const f = fileRef.current?.value;
+    const imgf = imgFileRef.current?.value;
+    const tagsChanged = !tagsEqual(selectedTags, video.tags);
+    const nameChanged = nameRef.current?.value !== video.name;
+
+    if (!f && !imgf && !tagsChanged && !nameChanged) {
+      setError("Change the title, tags, or files before submitting.");
+      return;
+    }
+
+    const form = e.target;
+    const formData = new FormData(form);
+    formData.set("name", nameRef.current?.value ?? video.name);
+    formData.set("tags", selectedTags.join(","));
+    formData.set("id", videoId);
+
+    setSubmitting(true);
+    try {
+      let res;
+      if (f && imgf) {
+        await axios.delete(`${API_BASE_URL}/delete/${videoId}`, { withCredentials: true });
+        res = await axios.post(`${API_BASE_URL}/add`, formData, { withCredentials: true });
+      } else if (f && !imgf) {
+        res = await axios.patch(`${API_BASE_URL}/edit/f`, formData, { withCredentials: true });
+      } else if (imgf && !f) {
+        res = await axios.patch(`${API_BASE_URL}/edit/imgf/${videoId}`, formData, { withCredentials: true });
+      } else {
+        res = await axios.patch(`${API_BASE_URL}/edit/${videoId}`, formData, { withCredentials: true });
+      }
+
+      if (handleAuthResponse(res, { redirect: true })) {
+        return;
+      }
+
+      const authMsg = res?.data?.message;
+      if (res?.data?.success === false) {
+        setError(authMsg || "You are not allowed to edit this video.");
+        return;
+      }
+
+      navigate("/show", {
+        state: {
+          ...video,
+          name: nameRef.current?.value ?? video.name,
+          tags: selectedTags,
+        },
+      });
+    } catch (err) {
+      if (handleAuthResponse(err, { redirect: true })) {
+        return;
+      }
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.msg ||
+        "Could not save video changes. Please try again.";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleTagsChange = (tagList) => {
+    setSelectedTags(tagList);
+  };
+
+  if (!initialData._id && !video._id) {
+    return (
+      <Container className="p-4 border rounded text-center">
+        <p style={{ color: "#A7C7E7" }}>No video selected. Open a video and choose Edit.</p>
+      </Container>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Container className="p-4 border rounded text-center">
+        <p style={{ color: "#A7C7E7" }}>Loading video…</p>
+      </Container>
+    );
+  }
+
+  return (
+    <>
+      <div className="mx-auto">
+        <Container className="p-4 border rounded">
+          <Form onSubmit={handleSubmit} encType="multipart/form-data" method="POST">
+            <div className="text-center mb-4">
+              <h2 style={{ color: "#A7C7E7" }}>Edit your video here!</h2>
+            </div>
+
+            {error && (
+              <p className="text-danger" role="alert">
+                {error}
+              </p>
+            )}
+
+            <Form.Group className="mb-3" controlId="formGridTitle">
+              <Form.Label>Video Title</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter video title"
+                name="name"
+                ref={nameRef}
+                defaultValue={video.name}
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Tags</Form.Label>
+              <TagAdderEdit
+                tags={tags}
+                initialSelectedTags={normalizeTags(video.tags)}
+                onTagsChange={handleTagsChange}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formFileLg" className="mb-3">
+              <Form.Label>If you want to change video, please select video</Form.Label>
+              <Form.Control type="file" name="file" ref={fileRef} accept="video/*" size="lg" />
+            </Form.Group>
+
+            <Form.Group controlId="formFileImg" className="mb-3">
+              <Form.Label>If you want to change image, please select image</Form.Label>
+              <Form.Control type="file" name="imgFile" ref={imgFileRef} accept="image/*" size="lg" />
+            </Form.Group>
+
+            <Button
+              variant="light"
+              style={submitBtnStyle}
+              type="submit"
+              className="w-100"
+              disabled={submitting}
+            >
+              {submitting ? "Saving…" : "Submit"}
+            </Button>
+          </Form>
+        </Container>
+      </div>
+      {loginModal}
+    </>
+  );
+}
+
+export default EditVideo;

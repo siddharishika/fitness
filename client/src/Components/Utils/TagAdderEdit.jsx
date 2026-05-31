@@ -1,95 +1,105 @@
-import { IoAddOutline, IoCheckmarkSharp } from "react-icons/io5";
- 
-import React, { useRef, useState, useEffect } from "react";
-import {
-  ButtonGroup,
-  Container,
-  ToggleButton,
-  Row,
-  Col,
-} from "react-bootstrap";
+import { IoCheckmarkSharp } from "react-icons/io5";
+import React, { useState, useEffect, useRef } from "react";
+import { Container, ToggleButton } from "react-bootstrap";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || window.location.origin;
+function normalizeTags(value) {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (typeof value === "string" && value.trim()) {
+    return value.split(",").map((t) => t.trim()).filter(Boolean);
+  }
+  return [];
+}
 
-function TagAdderEdit({ tags: initialTags = [], onTagsChange, selectedTagsChecked }) {
-  const [tags, setTags] = useState(initialTags);
-  const tagInputRef = useRef();
-  const [checked, setChecked] = useState(selectedTagsChecked || {});
-  const [finalTags, setFinalTags] = useState([]);
-  console.log("Selected Tags in TagAdderEdit:", checked);
+function tagsKey(tags) {
+  return [...tags].sort().join("\0");
+}
 
-  // Update finalTags whenever checked or tags change
+function buildCheckedState(allTags, selectedTags) {
+  const selectedSet = new Set(normalizeTags(selectedTags));
+  const checkedObj = {};
+  allTags.forEach((tag) => {
+    checkedObj[tag] = selectedSet.has(tag);
+  });
+  selectedSet.forEach((tag) => {
+    if (!(tag in checkedObj)) {
+      checkedObj[tag] = true;
+    }
+  });
+  return checkedObj;
+}
+
+function mergeTagList(initialTags, initialSelectedTags, prevTags = []) {
+  const merged = [...initialTags];
+  normalizeTags(initialSelectedTags).forEach((tag) => {
+    if (!merged.includes(tag)) merged.push(tag);
+  });
+  prevTags.forEach((tag) => {
+    if (!merged.includes(tag)) merged.push(tag);
+  });
+  return merged;
+}
+
+function TagAdderEdit({ tags: initialTags = [], initialSelectedTags = [], onTagsChange }) {
+  const onTagsChangeRef = useRef(onTagsChange);
+  onTagsChangeRef.current = onTagsChange;
+
+  const initialTagsKey = tagsKey(initialTags);
+  const selectedKey = tagsKey(normalizeTags(initialSelectedTags));
+
+  const [tags, setTags] = useState(() =>
+    mergeTagList(initialTags, initialSelectedTags)
+  );
+
+  const [checked, setChecked] = useState(() =>
+    buildCheckedState(
+      mergeTagList(initialTags, initialSelectedTags),
+      initialSelectedTags
+    )
+  );
+
   useEffect(() => {
-    const checkedTags = tags.filter((tag) => checked[tag]);
-    setFinalTags(checkedTags);
-    if (onTagsChange) {
-      onTagsChange(checkedTags);
-    }
-  }, [checked, tags]); // <-- Remove onTagsChange from dependencies
+    setTags((prev) => mergeTagList(initialTags, initialSelectedTags, prev));
+    setChecked((prev) => {
+      const merged = mergeTagList(initialTags, initialSelectedTags, Object.keys(prev));
+      return buildCheckedState(merged, initialSelectedTags);
+    });
+  }, [initialTagsKey, selectedKey]);
 
-  const handleAddTag = (e) => {
-    e.preventDefault();
-    const newTag = tagInputRef.current.value.trim();
-    if (newTag && !tags.includes(newTag)) {
-      setTags((prev) => [...prev, newTag]);
-      setChecked((prev) => ({ ...prev, [newTag]: true }));
-      tagInputRef.current.value = "";
-    }
-  };
-
-  const chunkArray = (array, chunkSize) => {
-    const results = [];
-    for (let i = 0; i < array.length; i += chunkSize) {
-      results.push(array.slice(i, i + chunkSize));
-    }
-    return results;
+  const notifyTagsChange = (nextChecked, tagList) => {
+    const checkedTags = tagList.filter((tag) => nextChecked[tag]);
+    onTagsChangeRef.current?.(checkedTags);
   };
 
   return (
     <div>
-      <Container>
-        <label htmlFor="tags">Tags:</label>
-        {chunkArray(tags, Math.ceil(tags.length / 5)).map((rowTags, rowIdx) => (
-          <Row key={rowIdx} className="mb-2">
-            {rowTags && rowTags.map((tag, idx) => (
-              <Col key={idx}>
-                <ToggleButton
-                  className="mb-2"
-                  id={`toggle-${rowIdx}-${idx}`}
-                  type="checkbox"
-                  style={{
-                    backgroundColor: "white",
-                    color: "black",
-                    border: "1px solid #ccc",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-start",
-                    gap: "8px",
-                  }}
-                  checked={checked[tag]}
-                  value={tag}
-                  onChange={(e) => {
-                    setChecked((prev) => ({
-                      ...prev,
-                      [tag]: e.target.checked,
-                    }));
-                  }}
-                >
-                  {checked[tag] && (
-                    <IoCheckmarkSharp style={{ color: "green" }} />
-                  )}
-                  <span>{tag}</span>
-                </ToggleButton>
-              </Col>
-            ))}
-          </Row>
-        ))}
+      <Container fluid className="px-0">
+        <div className="tag-picker-grid">
+          {tags.map((tag, idx) => (
+            <div key={tag} className="tag-picker-cell">
+              <ToggleButton
+                className={`tag-picker-btn ${checked[tag] ? "tag-picker-btn--checked" : "tag-picker-btn--unchecked"}`}
+                id={`edit-toggle-${idx}`}
+                type="checkbox"
+                checked={!!checked[tag]}
+                value={tag}
+                onChange={(e) => {
+                  const next = {
+                    ...checked,
+                    [tag]: e.target.checked,
+                  };
+                  setChecked(next);
+                  notifyTagsChange(next, tags);
+                }}
+              >
+                {checked[tag] && (
+                  <IoCheckmarkSharp className="tag-picker-check" />
+                )}
+                <span className="tag-picker-label">{tag}</span>
+              </ToggleButton>
+            </div>
+          ))}
+        </div>
       </Container>
-      {/* Display finalTags for debugging */}
-      <div>
-        <strong>Checked tags:</strong> {finalTags.join(", ")}
-      </div>
     </div>
   );
 }

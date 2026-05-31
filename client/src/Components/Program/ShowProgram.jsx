@@ -1,27 +1,41 @@
 import axios from 'axios';
- 
+
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Card, Button, Form, InputGroup } from "react-bootstrap";
 import RatingPrograms from "./RatingPrograms";
 import { useAuth } from '../Utils/AuthProvider';
+import { IoSwapHorizontalOutline } from 'react-icons/io5';
+import StarRatingDisplay from '../Utils/StarRatingDisplay';
+import { useLoginPrompt } from '../Utils/useLoginPrompt';
+import { isAuthorContentError } from '../Utils/authorContent';
+import AuthorContentModal from '../Utils/AuthorContentModal';
+import ConfirmDeleteModal from '../Utils/ConfirmDeleteModal';
+import { useConfirmDelete } from '../Utils/useConfirmDelete';
+import isCoach from '../Utils/isCoach';
+import ReviewComment from '../Utils/ReviewComment';
 const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || window.location.origin;
-  
+  import.meta.env.VITE_API_BASE_URL || window.location.origin;
+
 function ShowProgram() {
   let location = useLocation();
-  let program = location.state;
-  let [selectedValue, setSelect] = useState(1);
+  let initialProgram = location.state;
+  let [program, setProgram] = useState(initialProgram);
+  let [selectedValue, setSelect] = useState(0);
   const params = useParams();
-  let [arr, setArr] = useState([]);
   let [vids, setVids] = useState([]);
-  let [show, setShow] = useState([]);
+  let [show, setShow] = useState(null);
+  let [liked, setLiked] = useState(false);
   let navigate = useNavigate();
   let { user } = useAuth();
   const reviewRef = useRef(null);
-  console.log(user);
+  const { promptLogin, redirectToLogin, loginModal, handleAuthResponse } = useLoginPrompt();
+  const { requestDelete, deleteModalProps } = useConfirmDelete();
+  const [showAuthorContent, setShowAuthorContent] = useState(false);
   const coachId = program?.coach?._id ?? program?.coach;
   const isOwner = user && coachId && String(user._id) === String(coachId);
-  
+  const canManage = isCoach(user) && isOwner;
+
   useEffect(
     function () {
       async function getProgram() {
@@ -29,162 +43,294 @@ function ShowProgram() {
           `${API_BASE_URL}/showprogram/${program._id}`,
           { withCredentials: true }
         );
-        let { vids} = res.data.data;
-        // setProgram(program);
+        let { program: updatedProgram, vids } = res.data.data;
+        setProgram(updatedProgram);
         setVids(vids);
-        setSelect(1);
-        let dropdown = document.getElementById("dropdownButton");
-        dropdown.setAttribute("value", selectedValue);
-        setShow(vids[0]);
+        setSelect(0);
+        setShow(vids?.[0]?.[0] ?? null);
+        // check if program is in user's liked programs
+        try {
+          let likedRes = await axios.get(`${API_BASE_URL}/getlikedprograms`, { withCredentials: true });
+          if (likedRes.data && likedRes.data.data && Array.isArray(likedRes.data.data.likedPrograms)) {
+            const exists = likedRes.data.data.likedPrograms.some((p) => String(p._id) === String(updatedProgram._id));
+            setLiked(exists);
+          }
+        } catch (err) {
+          // ignore if unauthenticated
+        }
       }
       getProgram();
     },
-    [params]
+    [params, initialProgram]
   );
   
   const handleSelect = (e) => {
-    setSelect(e.target.value);
-    let dropdown = document.getElementById("dropdownButton");
-    dropdown.setAttribute("value", selectedValue);
-    fn(selectedValue);
+    const value = Number(e.target.value);
+    setSelect(value);
+    setShow(vids[value]);
   };
-  function fn(val) {
-    setShow(vids[val]);
-  }
+
   const handleShow = (ele) => {
     navigate(`/show`, { state: ele });
   };
   const handleEditProgram = () => {
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
     navigate(`/program/edit`, { state: program });
   };
   const handleLikedPrograms = async () => {
-    let data = {};
-    data.program = program;
-    data.vids = vids;
+    if (!user) {
+      promptLogin();
+      return;
+    }
+    let data = { program, vids };
     try {
       let res = await axios.post(`${API_BASE_URL}/changeprogramlike`, data, {
         withCredentials: true,
       });
 
-      if (
-        res.data.success == false &&
-        res.data.message == "You need to be authenticated to access this page!"
-      ) {
-        navigate("/login");
+      if (handleAuthResponse(res)) {
         return;
       }
-      navigate("/");
+      setLiked((prev) => !prev);
     } catch (e) {
+      if (handleAuthResponse(e)) {
+        return;
+      }
       console.log(e, "Nahi ho payega");
     }
   };
-  const handleDeleteProgram = async (e) => {
-    try {
-      let res = await axios.post(`${API_BASE_URL}/deleteprogram/${program._id}`, program, {
-        withCredentials: true,
-      });
-      if ( res.data.success == false &&
-        res.data.message == "You need to be authenticated to access this page!") {
-        navigate("/login");
-        return;
-      }    
-      navigate("/");
-    } catch (e) {
-      console.log(e, "Nahi ho payega");
-    } 
+  const performDeleteProgram = async () => {
+    let res = await axios.post(`${API_BASE_URL}/deleteprogram/${program._id}`, program, {
+      withCredentials: true,
+    });
+    if (handleAuthResponse(res, { redirect: true })) {
+      return;
+    }
+    navigate("/");
+  };
+
+  const handleDeleteProgram = () => {
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+    requestDelete({
+      itemLabel: "program",
+      itemName: program.name,
+      onConfirm: async () => {
+        try {
+          await performDeleteProgram();
+        } catch (e) {
+          if (handleAuthResponse(e, { redirect: true })) {
+            return;
+          }
+          console.log(e, "Nahi ho payega");
+        }
+      },
+    });
   };
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    const reviewText = reviewRef.current ? reviewRef.current.value : "";
-    console.log("Submitting review:", reviewText);
-    let data = {};
-    data.review = reviewText;
-    try {
-      let res = await axios.post(`${API_BASE_URL}/program/addreview/${program._id}`, data, {
-      withCredentials: true,
-    });
-    if (
-    res.data.success == false &&
-    res.data.message == "You need to be authenticated to access this page!"
-    ) {
-      navigate("/login");
+    if (isOwner) {
+      setShowAuthorContent(true);
       return;
     }
-    navigate("/showprogram", { state: program });
-    reviewRef.current.value = "";
-    }catch (e) {
-      console.log(e, "Nahi ho payega"); 
+    if (!user) {
+      promptLogin();
+      return;
     }
-  }
+    const reviewText = reviewRef.current ? reviewRef.current.value : "";
+    try {
+      let res = await axios.post(`${API_BASE_URL}/program/addreview/${program._id}`, { review: reviewText }, {
+        withCredentials: true,
+      });
+      if (handleAuthResponse(res)) {
+        return;
+      }
+      if (isAuthorContentError(res)) {
+        setShowAuthorContent(true);
+        return;
+      }
+      navigate("/showprogram", { state: program });
+      reviewRef.current.value = "";
+    } catch (e) {
+      if (isAuthorContentError(e)) {
+        setShowAuthorContent(true);
+        return;
+      }
+      if (handleAuthResponse(e)) {
+        return;
+      }
+      console.log(e, "Nahi ho payega");
+    }
+  };
 
   if (!program) {
     return <div>Loading program...</div>;
   }
-  console.log(program);
+  console.log("Program details: ", program.schedule);
   return (
-    <div>
-      ShowProgram
-      <h1>{program.name}</h1>
-      
-      {!isOwner &&
-      <>
-        <RatingPrograms programId={program._id} currentRating={program.currentRating} currentRatingCount={program.currentRatingCount} isProgram={true} />
+    <>
+      <div
+        style={{
+          backgroundColor: "#0e0f14",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          zIndex: -1,
+        }}
+      />
+      <div className="mx-auto p-4 rounded" style={{ position: "relative", zIndex: 1, backgroundColor: "#0e0f14", color: "#f4f4f8" }}>
+        <h1 style={{ color: "#A7C7E7" }}>{program.name}</h1>
+
+        <Card style={{ border: "5px solid #A7C7E7", borderRadius: "10px", backgroundColor: "#000000" }}>
+          <Card.Body>
+            <Card.Text style={{ color: "#f4f4f8" }}><strong>Equipment:</strong> {program.equipment?.join(" • ") || "No equipment required"}</Card.Text>
+            <Card.Text style={{ color: "#f4f4f8" }}><strong>Days:</strong> {program.numberOfDays}</Card.Text>
+            <Card.Text style={{ color: "#f4f4f8" }}><strong>Time/Day:</strong> {program.timePerDay}</Card.Text>
+            <Card.Text style={{ color: "#f4f4f8" }}><strong>Tags:</strong> {program.tags?.join(" • ")}</Card.Text>
+            <Card.Text style={{ color: "#f4f4f8" }}><strong>Description:</strong> {program.description}</Card.Text>
+            <Card.Text>
+              {program.currentRating > 0 ? (
+                <StarRatingDisplay
+                  rating={program.currentRating}
+                  fontSize="clamp(14px, 2.5vw, 28px)"
+                />
+              ) : (
+                <span style={{ color: '#f4f4f8' }}>No ratings yet</span>
+              )}
+            </Card.Text>
+            <div style={{ color: "#f4f4f8", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                <Button variant="light" style={{ border: "2px solid #A7C7E7", backgroundColor: "#161823", color: "#A7C7E7" }}  onClick={handleLikedPrograms}>
+                  {liked ? 'Remove from Liked Programs' : 'Add to Liked Programs'}
+                </Button>
+                {canManage && (
+                  <>
+                    <Button variant="light" style={{ border: "2px solid #A7C7E7", backgroundColor: "#161823", color: "#A7C7E7" }}  onClick={handleEditProgram}>
+                      Edit Program
+                    </Button>
+                    <Button variant="light" style={{ border: "2px solid #A7C7E7", backgroundColor: "#161823", color: "#A7C7E7" }}  onClick={handleDeleteProgram}>
+                      Delete Program
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </Card.Body>
+        </Card>
+
         <br />
-        <br />
-        <form onSubmit={handleReviewSubmit}  method="POST">
-          <label htmlFor="review">Review</label>
-          <textarea
-            ref={reviewRef}
-            name="review"
-            id="review"
-            placeholder="Enter your review here"
-            cols="30"
-            rows="10"
-          ></textarea>
-          <button type="submit">Submit</button>
-        </form>
-      </>
-      }
-      <select id="dropdownButton" onChange={handleSelect}>
-        {program?.schedule?.map((day, idx) => {
-            return (
-              <option value={idx + 1} key={idx}>
+
+        {/* <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          <label htmlFor="dropdownButton" style={{ color: "#f4f4f8", minWidth: "110px" }}>Select Day</label>
+          <select id="dropdownButton" value={selectedValue} onChange={handleSelect} style={{ padding: "10px", borderRadius: "8px", border: "1px solid #A7C7E7", backgroundColor: "#161823", color: "#f4f4f8" }}>
+            {program?.schedule?.map((day, idx) => (
+              <option value={idx} key={idx}>
                 Day {idx + 1}
               </option>
-            );
-          })}
-      </select>
-      {show &&
-        show.map((ele, idx) => {
-          return (
-            <div key={idx} onClick={(e) => handleShow(ele)}>
-              <h1>Day {idx + 1}</h1>
-              <h3>{ele.name}</h3>
-              <img src={ele.imgFileUrl} alt="" height="150" width="150" />
-              <h3>{ele.tags.join(" , ")}</h3>
-            </div>
-          );
-        })}
-      {!show && <div>Rest Day</div>}
-      {isOwner && (
-        <>
-          <button onClick={handleEditProgram}>Edit Program</button>
-          <button onClick={handleDeleteProgram}>Delete Program</button>
-        </>
-      )}
-      <button onClick={handleLikedPrograms}>Add to Liked Programs</button>
-      <>
-      {program && program.reviews && program.reviews.map((rev, i) => {
-        return (
-          <div key={i}>
-            <h4>{rev.user.username}</h4>
-            <p>{rev.review}</p>
+            ))}
+          </select>
+        </div>
+        
+        <br /> */}
+
+        {program?.schedule ? (
+          program.schedule.map((day, idx) => (
+            day && day.length > 0 ? (
+              <React.Fragment key={`day-${idx}`}>
+              <Card style={{ border: "2px solid #A7C7E7", borderRadius: "10px", backgroundColor: "#000000", cursor: "pointer" }} onClick={() => handleShow(program.schedule[idx][0])}>
+                <Card.Body>
+                  <Card.Title style={{ color: "#A7C7E7" }}>Day {idx + 1}: {program.schedule[idx][0]?.name}</Card.Title>
+                  <div style={{ display: "flex", gap: "20px", alignItems: "center", flexWrap: "wrap" }}>
+                    <img src={program.schedule[idx][0]?.imgFileUrl} alt="" height="120" width="120" style={{ objectFit: "cover", borderRadius: "10px" }} />
+                    <Card.Text style={{ color: "#f4f4f8" }}>{program.schedule[idx][0]?.tags?.join(" • ")}</Card.Text>
+                  </div>
+                </Card.Body>
+              </Card>
+              <br />
+              </React.Fragment>
+            ) : (
+              <React.Fragment key={`day-${idx}`}>
+              <Card style={{ border: "2px solid #A7C7E7", borderRadius: "10px", backgroundColor: "#161823" }}>
+                <Card.Body>
+                  <Card.Title style={{ color: "#A7C7E7" }}>Day {idx + 1}: Rest Day</Card.Title>
+                  <Card.Text style={{ color: "#f4f4f8" }}>No workout scheduled for this day</Card.Text>
+                </Card.Body>
+              </Card>
+              <br />
+              </React.Fragment>
+            )
+          ))
+        ) : (
+          <Card style={{ border: "2px solid #A7C7E7", borderRadius: "10px", backgroundColor: "#000000" }}>
+            <Card.Body>
+              <Card.Title style={{ color: "#A7C7E7" }}>No schedule available</Card.Title>
+            </Card.Body>
+          </Card>
+        )}
+
+
+        <br />
+
+        {!isOwner && (
+          <div style={{ border: "2px solid #A7C7E7", padding: "20px", borderRadius: "10px", backgroundColor: "#A7C7E7" }}>
+            <h3 style={{ color: "#1f2532" }}><i>Rate this program</i></h3>
+            <RatingPrograms
+              programId={program._id}
+              currentRating={program.currentRating}
+              currentRatingCount={program.currentRatingCount}
+              contentRatings={program.rating}
+              isProgram={true}
+              isAuthenticated={!!user}
+              isOwner={isOwner}
+              onRequireLogin={promptLogin}
+            />
+            <br />
+            <br />
+            <Form onSubmit={handleReviewSubmit} method="POST">
+              <Form.Label><h3 style={{ color: "#1f2532" }}><i>Leave a review</i></h3></Form.Label>
+              <InputGroup style={{ padding: "10px" }}>
+                <Form.Control as="textarea" aria-label="With textarea" placeholder="Enter your review here" name="review" ref={reviewRef} />
+              </InputGroup>
+              <Button type="submit" variant="light" style={{ border: "2px solid black", backgroundColor: "#161823", color: "#A7C7E7" }} className="w-100">
+                Submit
+              </Button>
+            </Form>
           </div>
-        );
-      })}
-      </>
-    </div>
+        )}
+
+        
+
+        <br />
+
+        
+        <h2 style={{ color: "#A7C7E7" }}><i>Comments</i></h2>
+        <div style={{ border: "2px solid #A7C7E7", padding: "10px", borderRadius: "10px", backgroundColor: "#000000" }}>
+        {program && program.reviews && program.reviews.map((rev, i) => (
+          <div key={i} style={{ padding: "10px", backgroundColor: "#000000", borderRadius: "10px", cursor: "pointer" }}>
+            <ReviewComment review={rev} />
+            {i < program.reviews.length - 1 && (
+              <hr style={{ borderColor: "#A7C7E7", margin: "1%px 0" }} />
+            )}
+          </div>
+
+        ))}
+        </div>
+      </div>
+      {loginModal}
+      <ConfirmDeleteModal {...deleteModalProps} />
+      <AuthorContentModal
+        show={showAuthorContent}
+        onHide={() => setShowAuthorContent(false)}
+      />
+    </>
   );
 }
 
