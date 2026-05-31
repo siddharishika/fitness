@@ -1,8 +1,9 @@
-/* Global dark theme background */
 :root {
   color-scheme: dark;
 }
-html, body, #root {
+html,
+body,
+#root {
   min-height: 100%;
   background: #0e0f14;
   color: #f4f4f8;
@@ -13,7 +14,6 @@ html, body, #root {
   background: transparent;
 }
 
-/* Consistent card sizing container */
 .cards-container {
   display: flex;
   flex-wrap: wrap;
@@ -39,7 +39,6 @@ html, body, #root {
   color: #f4f4f8;
 }
 
-/* Navbar link color for light navbar */
 .main-nav-1 {
   color: #1a1a1a !important;
 }
@@ -54,7 +53,7 @@ html, body, #root {
 .navbar-user-avatar {
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #A7C7E7;
+  border: 2px solid #a7c7e7;
   flex-shrink: 0;
 }
 
@@ -80,7 +79,6 @@ html, body, #root {
   }
 }
 
-/* Tag picker grid — equal cell width and height */
 .tag-picker-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -139,9 +137,9 @@ html, body, #root {
 }
 
 .tag-picker-btn--checked {
-  background-color: #A7C7E7 !important;
+  background-color: #a7c7e7 !important;
   color: #1f2532 !important;
-  border: 2px solid #A7C7E7 !important;
+  border: 2px solid #a7c7e7 !important;
 }
 
 .tag-picker-check {

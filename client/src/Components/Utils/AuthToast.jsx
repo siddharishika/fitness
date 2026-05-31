@@ -8,7 +8,11 @@ const toastStyle = {
 
 export default function AuthToast({ show, message, title = "Login", onClose }) {
   return (
-    <ToastContainer position="top-center" className="p-3" style={{ zIndex: 3000 }}>
+    <ToastContainer
+      position="top-center"
+      className="p-3"
+      style={{ zIndex: 3000 }}
+    >
       <Toast show={show} onClose={onClose} delay={4000} autohide bg="dark">
         <Toast.Header closeButton style={toastStyle}>
           <strong className="me-auto" style={{ color: "#A7C7E7" }}>

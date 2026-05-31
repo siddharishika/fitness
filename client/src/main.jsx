@@ -12,17 +12,12 @@ import { AuthProvider } from "./Components/Utils/AuthProvider";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider
-    breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
-    minBreakpoint="xxs"
+      breakpoints={["xxxl", "xxl", "xl", "lg", "md", "sm", "xs", "xxs"]}
+      minBreakpoint="xxs"
     >
       <Provider store={store}>
         <BrowserRouter>
           <AuthProvider>
-            {/* <ThemeProvider
-              breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
-              minBreakpoint="xxs"
-            > */}
-
             <div>
               <Navigation />
             </div>
@@ -30,10 +25,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Container className="mt-3">
               <App />
             </Container>
-            {/* </ThemeProvider>; */}
           </AuthProvider>
         </BrowserRouter>
       </Provider>
     </ThemeProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

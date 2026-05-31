@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import StarRatings from "react-star-ratings";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AlreadyRatedModal, { isAlreadyRatedError } from "../Utils/AlreadyRatedModal";
+import AlreadyRatedModal, {
+  isAlreadyRatedError,
+} from "../Utils/AlreadyRatedModal";
 import { isAuthRequiredError } from "../Utils/LoginRequiredModal";
 import { isAuthorContentError } from "../Utils/authorContent";
 import AuthorContentModal from "../Utils/AuthorContentModal";
@@ -70,9 +72,13 @@ export default function RatingPrograms(props) {
         newRatingCount: newCount,
       };
       try {
-        let res = await axios.patch(`${API_BASE_URL}/program/addrating/${props.programId}`, data, {
-          withCredentials: true,
-        });
+        let res = await axios.patch(
+          `${API_BASE_URL}/program/addrating/${props.programId}`,
+          data,
+          {
+            withCredentials: true,
+          },
+        );
 
         if (isAuthRequiredError(res)) {
           handleAuthRequired();

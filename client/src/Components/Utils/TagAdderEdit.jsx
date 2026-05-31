@@ -5,7 +5,10 @@ import { Container, ToggleButton } from "react-bootstrap";
 function normalizeTags(value) {
   if (Array.isArray(value)) return value.filter(Boolean);
   if (typeof value === "string" && value.trim()) {
-    return value.split(",").map((t) => t.trim()).filter(Boolean);
+    return value
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
   }
   return [];
 }
@@ -39,7 +42,11 @@ function mergeTagList(initialTags, initialSelectedTags, prevTags = []) {
   return merged;
 }
 
-function TagAdderEdit({ tags: initialTags = [], initialSelectedTags = [], onTagsChange }) {
+function TagAdderEdit({
+  tags: initialTags = [],
+  initialSelectedTags = [],
+  onTagsChange,
+}) {
   const onTagsChangeRef = useRef(onTagsChange);
   onTagsChangeRef.current = onTagsChange;
 
@@ -47,20 +54,24 @@ function TagAdderEdit({ tags: initialTags = [], initialSelectedTags = [], onTags
   const selectedKey = tagsKey(normalizeTags(initialSelectedTags));
 
   const [tags, setTags] = useState(() =>
-    mergeTagList(initialTags, initialSelectedTags)
+    mergeTagList(initialTags, initialSelectedTags),
   );
 
   const [checked, setChecked] = useState(() =>
     buildCheckedState(
       mergeTagList(initialTags, initialSelectedTags),
-      initialSelectedTags
-    )
+      initialSelectedTags,
+    ),
   );
 
   useEffect(() => {
     setTags((prev) => mergeTagList(initialTags, initialSelectedTags, prev));
     setChecked((prev) => {
-      const merged = mergeTagList(initialTags, initialSelectedTags, Object.keys(prev));
+      const merged = mergeTagList(
+        initialTags,
+        initialSelectedTags,
+        Object.keys(prev),
+      );
       return buildCheckedState(merged, initialSelectedTags);
     });
   }, [initialTagsKey, selectedKey]);

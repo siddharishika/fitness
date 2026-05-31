@@ -18,7 +18,10 @@ const submitBtnStyle = {
 function normalizeTags(value) {
   if (Array.isArray(value)) return value.filter(Boolean);
   if (typeof value === "string" && value.trim()) {
-    return value.split(",").map((t) => t.trim()).filter(Boolean);
+    return value
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
   }
   return [];
 }
@@ -27,9 +30,10 @@ function getDayVideoIds(day) {
   if (!Array.isArray(day)) return new Set();
   return new Set(
     day.map((entry) => {
-      if (entry && typeof entry === "object" && entry._id) return String(entry._id);
+      if (entry && typeof entry === "object" && entry._id)
+        return String(entry._id);
       return String(entry);
-    })
+    }),
   );
 }
 
@@ -60,7 +64,9 @@ function EditProgram(props) {
   const [checked, setChecked] = useState([]);
   const [videos, setVideos] = useState([]);
   const [equipArr, setEquipArr] = useState(data.equipment || []);
-  const [selectedTags, setSelectedTags] = useState(() => normalizeTags(data.tags));
+  const [selectedTags, setSelectedTags] = useState(() =>
+    normalizeTags(data.tags),
+  );
   const [loading, setLoading] = useState(true);
   const tags = props.tags || [];
 
@@ -71,7 +77,9 @@ function EditProgram(props) {
         return;
       }
       try {
-        const res = await axios.get(`${API_BASE_URL}/getall`, { withCredentials: true });
+        const res = await axios.get(`${API_BASE_URL}/getall`, {
+          withCredentials: true,
+        });
         if (handleAuthResponse(res, { redirect: true })) {
           return;
         }
@@ -109,7 +117,12 @@ function EditProgram(props) {
     setChecked((prev) => {
       if (days > prev.length) {
         const emptyRow = videos.map(() => false);
-        return [...prev, ...Array(days - prev.length).fill(null).map(() => [...emptyRow])];
+        return [
+          ...prev,
+          ...Array(days - prev.length)
+            .fill(null)
+            .map(() => [...emptyRow]),
+        ];
       }
       if (days < prev.length) {
         return prev.slice(0, days);
@@ -127,10 +140,8 @@ function EditProgram(props) {
     const dayIdx = selectedValue - 1;
     setChecked((prev) =>
       prev.map((day, i) =>
-        i === dayIdx
-          ? day.map((val, j) => (j === videoIdx ? !val : val))
-          : day
-      )
+        i === dayIdx ? day.map((val, j) => (j === videoIdx ? !val : val)) : day,
+      ),
     );
   };
 
@@ -165,14 +176,15 @@ function EditProgram(props) {
       if (handleAuthResponse(err, { redirect: true })) {
         return;
       }
-      console.log(err, "Nahi ho payega");
     }
   };
 
   if (!data._id) {
     return (
       <Container className="p-4 border rounded text-center">
-        <p style={{ color: "#A7C7E7" }}>No program selected. Open a program and choose Edit.</p>
+        <p style={{ color: "#A7C7E7" }}>
+          No program selected. Open a program and choose Edit.
+        </p>
       </Container>
     );
   }
@@ -245,14 +257,26 @@ function EditProgram(props) {
             <Form.Group className="mb-3">
               <Form.Label>Equipment</Form.Label>
               <div className="d-flex gap-2 mb-2">
-                <Form.Control type="text" ref={equipmentRef} placeholder="Add equipment" />
-                <Button variant="light" style={submitBtnStyle} onClick={handlePlus2} type="button">
+                <Form.Control
+                  type="text"
+                  ref={equipmentRef}
+                  placeholder="Add equipment"
+                />
+                <Button
+                  variant="light"
+                  style={submitBtnStyle}
+                  onClick={handlePlus2}
+                  type="button"
+                >
                   <IoAddOutline />
                 </Button>
               </div>
               <ul className="list-unstyled mb-0">
                 {equipArr.map((item, idx) => (
-                  <li key={idx} className="d-flex align-items-center gap-2 mb-1">
+                  <li
+                    key={idx}
+                    className="d-flex align-items-center gap-2 mb-1"
+                  >
                     <span>{item}</span>
                     <Button
                       variant="link"
@@ -311,7 +335,9 @@ function EditProgram(props) {
                           style={{ height: "160px", objectFit: "cover" }}
                         />
                         <Card.Body>
-                          <Card.Title style={{ color: "#A7C7E7", fontSize: "1rem" }}>
+                          <Card.Title
+                            style={{ color: "#A7C7E7", fontSize: "1rem" }}
+                          >
                             {video.name}
                           </Card.Title>
                           <Form.Check
@@ -330,7 +356,12 @@ function EditProgram(props) {
               )}
             </Form.Group>
 
-            <Button variant="light" style={submitBtnStyle} type="submit" className="w-100">
+            <Button
+              variant="light"
+              style={submitBtnStyle}
+              type="submit"
+              className="w-100"
+            >
               Submit
             </Button>
           </Form>

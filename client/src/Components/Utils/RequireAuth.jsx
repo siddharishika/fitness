@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './AuthProvider';
-import { useLoginPrompt } from './useLoginPrompt';
-import { LOGIN_REQUIRED_MSG } from './routeToastMessages';
+import { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "./AuthProvider";
+import { useLoginPrompt } from "./useLoginPrompt";
+import { LOGIN_REQUIRED_MSG } from "./routeToastMessages";
 
 export default function RequireAuth({ children, redirectToLogin = false }) {
   const { user, loading } = useAuth();

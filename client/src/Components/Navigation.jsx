@@ -4,12 +4,11 @@ import React from "react";
 import { Nav, Navbar } from "react-bootstrap";
 import { Container } from "react-bootstrap/";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from './Utils/AuthProvider';
+import { useAuth } from "./Utils/AuthProvider";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-const DEFAULT_PROFILE_IMAGE =
-  'https://via.placeholder.com/40x40?text=User';
+const DEFAULT_PROFILE_IMAGE = "https://via.placeholder.com/40x40?text=User";
 
 function UserProfile({ user, onClick }) {
   return (
@@ -30,7 +29,7 @@ function UserProfile({ user, onClick }) {
     >
       <img
         src={user.fileUrl || DEFAULT_PROFILE_IMAGE}
-        alt={user.username ? `${user.username} profile` : 'Profile'}
+        alt={user.username ? `${user.username} profile` : "Profile"}
         width={40}
         height={40}
         className="navbar-user-avatar"
@@ -55,9 +54,7 @@ function Navigation() {
       });
       setUser(null);
       navigate("/login");
-    } catch (e) {
-      console.log(e, "Nahi ho payega");
-    }
+    } catch (e) {}
   };
   const handleSignUp = (e) => {
     e.preventDefault();
@@ -95,7 +92,7 @@ function Navigation() {
       collapseOnSelect
       expand="lg"
       data-bs-theme="light"
-      style={{ backgroundColor: '#ffffff', position: 'relative', zIndex: 2000 }}
+      style={{ backgroundColor: "#ffffff", position: "relative", zIndex: 2000 }}
     >
       <Container>
         <Navbar.Brand style={{ color: "rgb(209, 48, 75)" }} href="/">
@@ -135,7 +132,6 @@ function Navigation() {
                 <div className="navbar-user-profile-wrap">
                   <UserProfile user={user} onClick={handleMyAccount} />
                 </div>
-                
               </>
             )}
           </Nav>

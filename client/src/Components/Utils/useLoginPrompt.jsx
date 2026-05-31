@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import LoginRequiredModal, { isAuthRequiredError } from './LoginRequiredModal';
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import LoginRequiredModal, { isAuthRequiredError } from "./LoginRequiredModal";
 
 export { isAuthRequiredError };
 
@@ -20,29 +20,35 @@ export function useLoginPrompt() {
       onHide={() => setShowLoginModal(false)}
       onLogin={() => {
         setShowLoginModal(false);
-        navigate('/login');
+        navigate("/login");
       }}
     />
   );
 
-  const redirectToLogin = useCallback((message) => {
-    navigate('/login', {
-      replace: true,
-      state: { authError: message || undefined },
-    });
-  }, [navigate]);
+  const redirectToLogin = useCallback(
+    (message) => {
+      navigate("/login", {
+        replace: true,
+        state: { authError: message || undefined },
+      });
+    },
+    [navigate],
+  );
 
-  const handleAuthResponse = useCallback((errorOrResponse, options = {}) => {
-    if (isAuthRequiredError(errorOrResponse)) {
-      if (options.redirect) {
-        redirectToLogin(options.authMessage);
-      } else {
-        promptLogin();
+  const handleAuthResponse = useCallback(
+    (errorOrResponse, options = {}) => {
+      if (isAuthRequiredError(errorOrResponse)) {
+        if (options.redirect) {
+          redirectToLogin(options.authMessage);
+        } else {
+          promptLogin();
+        }
+        return true;
       }
-      return true;
-    }
-    return false;
-  }, [promptLogin, redirectToLogin]);
+      return false;
+    },
+    [promptLogin, redirectToLogin],
+  );
 
   return { promptLogin, redirectToLogin, loginModal, handleAuthResponse };
 }

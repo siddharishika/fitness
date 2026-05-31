@@ -25,7 +25,9 @@ function EditRecipe(props) {
   const [recipe, setRecipe] = useState(initialData);
   const [ingredients, setIngredients] = useState(initialData.ingredients || []);
   const [process, setProcess] = useState(initialData.process || []);
-  const [selectedTags, setSelectedTags] = useState(() => normalizeTags(initialData.tags));
+  const [selectedTags, setSelectedTags] = useState(() =>
+    normalizeTags(initialData.tags),
+  );
   const [loading, setLoading] = useState(!!initialData._id);
 
   const nameRef = useRef(initialData.name || "");
@@ -43,9 +45,12 @@ function EditRecipe(props) {
         return;
       }
       try {
-        const res = await axios.get(`${API_BASE_URL}/showrecipe/${initialData._id}`, {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          `${API_BASE_URL}/showrecipe/${initialData._id}`,
+          {
+            withCredentials: true,
+          },
+        );
         const data = res.data.data;
         setRecipe(data);
         setIngredients(data.ingredients || []);
@@ -92,12 +97,12 @@ function EditRecipe(props) {
 
   const recipeTagOptions = useMemo(
     () => mergeRecipeTagOptions(props.tags || [], recipe.tags),
-    [props.tags, recipe.tags]
+    [props.tags, recipe.tags],
   );
 
   const initialRecipeTags = useMemo(
     () => normalizeTags(recipe.tags),
-    [recipe.tags]
+    [recipe.tags],
   );
 
   const handleSubmit = async (e) => {
@@ -126,14 +131,15 @@ function EditRecipe(props) {
       if (handleAuthResponse(err, { redirect: true })) {
         return;
       }
-      console.log(err, "Nahi ho payega");
     }
   };
 
   if (!initialData._id && !recipe._id) {
     return (
       <Container className="p-4 border rounded text-center">
-        <p style={{ color: "#A7C7E7" }}>No recipe selected. Open a recipe and choose Edit.</p>
+        <p style={{ color: "#A7C7E7" }}>
+          No recipe selected. Open a recipe and choose Edit.
+        </p>
       </Container>
     );
   }
@@ -219,16 +225,26 @@ function EditRecipe(props) {
                   />
                 </Col>
                 <Col md={2}>
-                  <Button variant="light" style={submitBtnStyle} onClick={handleAddIngredient} type="button" className="w-100">
-                    {/* <IoAddOutline /> */}
+                  <Button
+                    variant="light"
+                    style={submitBtnStyle}
+                    onClick={handleAddIngredient}
+                    type="button"
+                    className="w-100"
+                  >
                     Add Ingredient
                   </Button>
                 </Col>
               </Row>
               <ul className="list-unstyled mb-0">
                 {ingredients.map((item, idx) => (
-                  <li key={idx} className="d-flex align-items-center gap-2 mb-1">
-                    <span>{item.ingredient} — {item.amount}grams</span>
+                  <li
+                    key={idx}
+                    className="d-flex align-items-center gap-2 mb-1"
+                  >
+                    <span>
+                      {item.ingredient} — {item.amount}grams
+                    </span>
                     <Button
                       variant="link"
                       className="text-danger p-0"
@@ -294,7 +310,12 @@ function EditRecipe(props) {
               />
             </Form.Group>
 
-            <Button variant="light" style={submitBtnStyle} type="submit" className="w-100">
+            <Button
+              variant="light"
+              style={submitBtnStyle}
+              type="submit"
+              className="w-100"
+            >
               Submit
             </Button>
           </Form>

@@ -22,7 +22,10 @@ export default function DeleteAccountModal({
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header
         closeButton
-        style={{ backgroundColor: "#161823", borderBottom: "2px solid #A7C7E7" }}
+        style={{
+          backgroundColor: "#161823",
+          borderBottom: "2px solid #A7C7E7",
+        }}
       >
         <Modal.Title style={{ color: "#A7C7E7" }}>Delete account</Modal.Title>
       </Modal.Header>
@@ -42,7 +45,12 @@ export default function DeleteAccountModal({
       <Modal.Footer
         style={{ backgroundColor: "#161823", borderTop: "2px solid #A7C7E7" }}
       >
-        <Button variant="light" onClick={onHide} disabled={loading} style={btnStyle}>
+        <Button
+          variant="light"
+          onClick={onHide}
+          disabled={loading}
+          style={btnStyle}
+        >
           Cancel
         </Button>
         <Button

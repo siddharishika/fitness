@@ -1,27 +1,27 @@
-import axios from 'axios';
+import axios from "axios";
 import React, { useEffect, useState } from "react";
-import StarRatingDisplay from '../Utils/StarRatingDisplay';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardGroup } from 'react-bootstrap';
-import '../../App.css';
+import StarRatingDisplay from "../Utils/StarRatingDisplay";
+import { useNavigate } from "react-router-dom";
+import { Card, CardGroup } from "react-bootstrap";
+import "../../App.css";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
 const itemCardStyle = {
-  padding: '10px',
-  border: '2px solid #A7C7E7',
-  borderRadius: '10px',
-  cursor: 'pointer',
-  backgroundColor: '#000000',
+  padding: "10px",
+  border: "2px solid #A7C7E7",
+  borderRadius: "10px",
+  cursor: "pointer",
+  backgroundColor: "#000000",
 };
 
 const tagGroupBoxStyle = {
-  padding: '16px',
-  border: '2px solid #A7C7E7',
-  borderRadius: '10px',
-  backgroundColor: '#161823',
-  marginBottom: '28px',
+  padding: "16px",
+  border: "2px solid #A7C7E7",
+  borderRadius: "10px",
+  backgroundColor: "#161823",
+  marginBottom: "28px",
 };
 
 const CARD_WIDTH = 300;
@@ -30,17 +30,20 @@ const HORIZONTAL_INSET = 112;
 
 function getCardLimitForWidth(width) {
   const available = width - HORIZONTAL_INSET;
-  return Math.max(1, Math.floor((available + CARD_GAP) / (CARD_WIDTH + CARD_GAP)));
+  return Math.max(
+    1,
+    Math.floor((available + CARD_GAP) / (CARD_WIDTH + CARD_GAP)),
+  );
 }
 
 const seeMoreLinkStyle = {
-  padding: '6px 12px',
-  borderRadius: '8px',
-  border: '1px solid #A7C7E7',
-  backgroundColor: 'transparent',
-  color: '#A7C7E7',
-  cursor: 'pointer',
-  fontSize: '0.9rem',
+  padding: "6px 12px",
+  borderRadius: "8px",
+  border: "1px solid #A7C7E7",
+  backgroundColor: "transparent",
+  color: "#A7C7E7",
+  cursor: "pointer",
+  fontSize: "0.9rem",
 };
 
 function orderedTagEntries(tagsObj, predefinedTags = []) {
@@ -70,23 +73,24 @@ function VideoCard({ video, onClick }) {
       <Card.Img
         variant="top"
         src={video.imgFileUrl}
-        alt={video.name || 'Video image'}
+        alt={video.name || "Video image"}
         height="300"
         width="400"
         onError={(e) => {
           e.currentTarget.onerror = null;
-          e.currentTarget.src = 'https://via.placeholder.com/400x300?text=No+Image';
+          e.currentTarget.src =
+            "https://via.placeholder.com/400x300?text=No+Image";
         }}
       />
       <Card.Body>
-        <Card.Title style={{ color: '#A7C7E7' }}>
+        <Card.Title style={{ color: "#A7C7E7" }}>
           {video.name} by <i>{video.coach && video.coach.username}</i>
         </Card.Title>
         <Card.Text>
           {video.currentRating > 0 ? (
             <StarRatingDisplay rating={video.currentRating} />
           ) : (
-            <span style={{ color: '#A7C7E7' }}>No ratings yet</span>
+            <span style={{ color: "#A7C7E7" }}>No ratings yet</span>
           )}
         </Card.Text>
       </Card.Body>
@@ -102,8 +106,8 @@ function TagVideoGroup({ tag, videos, onVideoClick, cardLimit, onSeeMore }) {
     <section>
       <h3
         style={{
-          color: '#A7C7E7',
-          marginBottom: '12px',
+          color: "#A7C7E7",
+          marginBottom: "12px",
           fontWeight: 600,
         }}
       >
@@ -121,9 +125,9 @@ function TagVideoGroup({ tag, videos, onVideoClick, cardLimit, onSeeMore }) {
             ))}
           </div>
         </CardGroup>
-        <div style={{ marginTop: '12px' }}>
+        <div style={{ marginTop: "12px" }}>
           {hasMore && (
-            <span style={{ color: '#A7C7E7', marginRight: '8px' }}>
+            <span style={{ color: "#A7C7E7", marginRight: "8px" }}>
               Showing {cardLimit} of {videos.length} videos.
             </span>
           )}
@@ -144,7 +148,9 @@ function AllVideosTags({ tags: predefinedTags = [] }) {
   let navigate = useNavigate();
   let [tagsVideo, setTagsVideo] = useState({});
   let [loading, setLoading] = useState(true);
-  let [cardLimit, setCardLimit] = useState(() => getCardLimitForWidth(window.innerWidth));
+  let [cardLimit, setCardLimit] = useState(() =>
+    getCardLimitForWidth(window.innerWidth),
+  );
 
   useEffect(() => {
     function updateCardLimit() {
@@ -152,8 +158,8 @@ function AllVideosTags({ tags: predefinedTags = [] }) {
     }
 
     updateCardLimit();
-    window.addEventListener('resize', updateCardLimit);
-    return () => window.removeEventListener('resize', updateCardLimit);
+    window.addEventListener("resize", updateCardLimit);
+    return () => window.removeEventListener("resize", updateCardLimit);
   }, []);
 
   useEffect(() => {
@@ -164,7 +170,7 @@ function AllVideosTags({ tags: predefinedTags = [] }) {
       for (const tag of tagList) {
         const res = await axios.get(
           `${API_BASE_URL}/allvideos/${encodeURIComponent(tag)}`,
-          { withCredentials: true }
+          { withCredentials: true },
         );
         tagsObj[tag] = res.data.data || [];
       }
@@ -172,11 +178,10 @@ function AllVideosTags({ tags: predefinedTags = [] }) {
       setLoading(false);
     }
     fetchVideos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showVideo = (ele) => {
-    navigate('/show', { state: ele });
+    navigate("/show", { state: ele });
   };
 
   const seeAllForTag = (tag) => {
@@ -187,15 +192,15 @@ function AllVideosTags({ tags: predefinedTags = [] }) {
   const hasVideos = tagEntries.length > 0;
 
   if (loading) {
-    return <p style={{ color: '#A7C7E7' }}>Loading videos…</p>;
+    return <p style={{ color: "#A7C7E7" }}>Loading videos…</p>;
   }
 
   if (!hasVideos) {
     return (
-      <Card style={{ border: '2px solid #A7C7E7', backgroundColor: '#161823' }}>
+      <Card style={{ border: "2px solid #A7C7E7", backgroundColor: "#161823" }}>
         <Card.Body>
-          <Card.Title style={{ color: '#A7C7E7' }}>No videos yet</Card.Title>
-          <Card.Text style={{ color: '#f4f4f8' }}>
+          <Card.Title style={{ color: "#A7C7E7" }}>No videos yet</Card.Title>
+          <Card.Text style={{ color: "#f4f4f8" }}>
             Videos will appear here grouped by tag once they are added.
           </Card.Text>
         </Card.Body>
@@ -205,7 +210,9 @@ function AllVideosTags({ tags: predefinedTags = [] }) {
 
   return (
     <div>
-      <h2 style={{ color: '#A7C7E7', marginBottom: '20px' }}>Workout Videos by Tag</h2>
+      <h2 style={{ color: "#A7C7E7", marginBottom: "20px" }}>
+        Workout Videos by Tag
+      </h2>
       {tagEntries.map(([tag, videos]) => (
         <TagVideoGroup
           key={tag}

@@ -1,8 +1,7 @@
 import React from "react";
 import { Card } from "react-bootstrap";
 
-const DEFAULT_PROFILE_IMAGE =
-  "https://via.placeholder.com/32x32?text=User";
+const DEFAULT_PROFILE_IMAGE = "https://via.placeholder.com/32x32?text=User";
 
 function ReviewComment({ review }) {
   const username = review.user?.username || "Unknown User";

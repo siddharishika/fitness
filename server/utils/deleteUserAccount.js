@@ -17,7 +17,7 @@ async function removeVideosFromAllProgramSchedules(videoIds) {
   await Promise.all(
     programs.map(async (program) => {
       const nextSchedule = program.schedule.map((day) =>
-        day.filter((videoId) => !idSet.has(String(videoId)))
+        day.filter((videoId) => !idSet.has(String(videoId))),
       );
       const changed =
         JSON.stringify(nextSchedule) !== JSON.stringify(program.schedule);
@@ -25,7 +25,7 @@ async function removeVideosFromAllProgramSchedules(videoIds) {
         program.schedule = nextSchedule;
         await program.save();
       }
-    })
+    }),
   );
 }
 
@@ -52,7 +52,7 @@ async function deleteUserAccount(userId) {
   const recipeIds = recipes.map((recipe) => recipe._id);
 
   const videoFileIds = videos.flatMap((video) =>
-    [video.fileId, video.imgFileId].filter(Boolean)
+    [video.fileId, video.imgFileId].filter(Boolean),
   );
 
   await deleteImageKitFiles({
@@ -63,7 +63,7 @@ async function deleteUserAccount(userId) {
     recipes
       .map((recipe) => recipe.photo)
       .filter(Boolean)
-      .map((photoUrl) => deleteImageKitFileByUrl(photoUrl))
+      .map((photoUrl) => deleteImageKitFileByUrl(photoUrl)),
   );
 
   const pullUserEngagement = {
@@ -81,7 +81,7 @@ async function deleteUserAccount(userId) {
 
   if (videoIds.length) {
     cleanupTasks.push(
-      User.updateMany({}, { $pull: { likedVideos: { $in: videoIds } } })
+      User.updateMany({}, { $pull: { likedVideos: { $in: videoIds } } }),
     );
     cleanupTasks.push(removeVideosFromAllProgramSchedules(videoIds));
   }
@@ -91,14 +91,14 @@ async function deleteUserAccount(userId) {
       User.updateMany({}, { $pull: { likedPrograms: { $in: programIds } } }),
       User.updateMany(
         { currentProgram: { $in: programIds } },
-        { $unset: { currentProgram: "", currentCompleteSchedule: "" } }
-      )
+        { $unset: { currentProgram: "", currentCompleteSchedule: "" } },
+      ),
     );
   }
 
   if (recipeIds.length) {
     cleanupTasks.push(
-      User.updateMany({}, { $pull: { likedRecipes: { $in: recipeIds } } })
+      User.updateMany({}, { $pull: { likedRecipes: { $in: recipeIds } } }),
     );
   }
 

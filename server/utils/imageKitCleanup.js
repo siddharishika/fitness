@@ -6,7 +6,6 @@ function runImageKit(method, ...args) {
   return new Promise((resolve) => {
     method(...args, (error, result) => {
       if (error) {
-        console.error("ImageKit cleanup error:", error);
         resolve(null);
         return;
       }
@@ -66,7 +65,7 @@ async function findFileIdByUrl(url) {
 
   const normalizedUrl = url.split("?")[0];
   const match = searchResults.find(
-    (file) => file.filePath === filePath || file.url === normalizedUrl
+    (file) => file.filePath === filePath || file.url === normalizedUrl,
   );
   return match?.fileId || null;
 }

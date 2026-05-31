@@ -41,8 +41,8 @@ import { RECIPE_TAGS } from "./Components/Utils/recipeTags";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 function App() {
-  const publicKey = import.meta.env.publicKey; ;
-  const urlEndpoint = import.meta.env.urlEndpoint; ;
+  const publicKey = import.meta.env.publicKey;
+  const urlEndpoint = import.meta.env.urlEndpoint;
   let id = "";
   const workoutTags = [
     "Beginner",
@@ -69,44 +69,88 @@ function App() {
     "No Equipment",
   ];
 
-  // authenticator();
   return (
     <>
-      <div style={{
-        backgroundColor: "#0e0f14",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        zIndex: -1
-      }} />
+      <div
+        style={{
+          backgroundColor: "#0e0f14",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          zIndex: -1,
+        }}
+      />
       <div className="App" style={{ position: "relative", zIndex: 1 }}>
-        {/* <p>To use this funtionality please remember to setup the server</p> */}
-
-        {/* <IKUpload fileName={name} tags={["tag1"]} useUniqueFileName={true} isPrivateFile= {false} /> */}
-        {/* <Upload /> */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/workoutvideos" element={<AllVideos />} />
-          {/* <Route path='/new' element={<Upload />}/> */}
           <Route
             path="/workoutvideos/tags"
             element={<AllVideosTags tags={workoutTags} />}
           />
           <Route path="/workoutvideos/tag/:tag" element={<VideosByTag />} />
-          <Route path="video/add" element={<RequireAuth redirectToLogin><RequireCoach><UploadDemo tags={workoutTags} /></RequireCoach></RequireAuth>} />
+          <Route
+            path="video/add"
+            element={
+              <RequireAuth redirectToLogin>
+                <RequireCoach>
+                  <UploadDemo tags={workoutTags} />
+                </RequireCoach>
+              </RequireAuth>
+            }
+          />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/show" element={<Show />} />
-          <Route path="video/edit" element={<RequireAuth redirectToLogin><RequireCoach><EditVideo tags={workoutTags}/></RequireCoach></RequireAuth>} />
-          <Route path="program/add" element={<RequireAuth redirectToLogin><RequireCoach><AddProgram tags={workoutTags} /></RequireCoach></RequireAuth>} />
+          <Route
+            path="video/edit"
+            element={
+              <RequireAuth redirectToLogin>
+                <RequireCoach>
+                  <EditVideo tags={workoutTags} />
+                </RequireCoach>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="program/add"
+            element={
+              <RequireAuth redirectToLogin>
+                <RequireCoach>
+                  <AddProgram tags={workoutTags} />
+                </RequireCoach>
+              </RequireAuth>
+            }
+          />
           <Route path="/allprograms" element={<AllPrograms />} />
-          <Route path="/allprograms/tags" element={<AllProgramsTags tags={workoutTags} />} />
+          <Route
+            path="/allprograms/tags"
+            element={<AllProgramsTags tags={workoutTags} />}
+          />
           <Route path="/allprograms/tag/:tag" element={<ProgramsByTag />} />
           <Route path="/showprogram" element={<ShowProgram />} />
-          <Route path="program/edit" element={<RequireAuth redirectToLogin><RequireCoach><EditProgram tags={workoutTags} /></RequireCoach></RequireAuth>} />
-          <Route path="/recipe/add" element={<RequireAuth redirectToLogin><RequireCoach><AddRecipe tags={RECIPE_TAGS} /></RequireCoach></RequireAuth>} />
+          <Route
+            path="program/edit"
+            element={
+              <RequireAuth redirectToLogin>
+                <RequireCoach>
+                  <EditProgram tags={workoutTags} />
+                </RequireCoach>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/recipe/add"
+            element={
+              <RequireAuth redirectToLogin>
+                <RequireCoach>
+                  <AddRecipe tags={RECIPE_TAGS} />
+                </RequireCoach>
+              </RequireAuth>
+            }
+          />
           <Route path="/allrecipes" element={<AllRecipes />} />
           <Route
             path="/allrecipes/tags"
@@ -114,15 +158,86 @@ function App() {
           />
           <Route path="/allrecipes/tag/:tag" element={<RecipesByTag />} />
           <Route path="/showrecipe" element={<ShowRecipe />} />
-          <Route path="/myjourney" element={<RequireAuth redirectToLogin><MyJourney /></RequireAuth>} />
-          <Route path="/edituser" element={<RequireAuth redirectToLogin><EditUser /></RequireAuth>} />
-          <Route path="/likedvideos" element={<RequireAuth redirectToLogin><LikedVideos /></RequireAuth>} />
-          <Route path="/myvideos" element={<RequireAuth redirectToLogin><RequireCoach><MyVideos /></RequireCoach></RequireAuth>} />
-          <Route path="/likedprograms" element={<RequireAuth redirectToLogin><LikedPrograms /></RequireAuth>} />
-          <Route path="/likedrecipes" element={<RequireAuth redirectToLogin><LikedRecipes /></RequireAuth>} />
-          <Route path="/myprograms" element={<RequireAuth redirectToLogin><RequireCoach><MyPrograms /></RequireCoach></RequireAuth>} />
-          <Route path="/myrecipes" element={<RequireAuth redirectToLogin><RequireCoach><MyRecipes /></RequireCoach></RequireAuth>} />
-          <Route path="/recipe/edit" element={<RequireAuth redirectToLogin><RequireCoach><EditRecipe tags={RECIPE_TAGS} /></RequireCoach></RequireAuth>} />
+          <Route
+            path="/myjourney"
+            element={
+              <RequireAuth redirectToLogin>
+                <MyJourney />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/edituser"
+            element={
+              <RequireAuth redirectToLogin>
+                <EditUser />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/likedvideos"
+            element={
+              <RequireAuth redirectToLogin>
+                <LikedVideos />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/myvideos"
+            element={
+              <RequireAuth redirectToLogin>
+                <RequireCoach>
+                  <MyVideos />
+                </RequireCoach>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/likedprograms"
+            element={
+              <RequireAuth redirectToLogin>
+                <LikedPrograms />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/likedrecipes"
+            element={
+              <RequireAuth redirectToLogin>
+                <LikedRecipes />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/myprograms"
+            element={
+              <RequireAuth redirectToLogin>
+                <RequireCoach>
+                  <MyPrograms />
+                </RequireCoach>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/myrecipes"
+            element={
+              <RequireAuth redirectToLogin>
+                <RequireCoach>
+                  <MyRecipes />
+                </RequireCoach>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/recipe/edit"
+            element={
+              <RequireAuth redirectToLogin>
+                <RequireCoach>
+                  <EditRecipe tags={RECIPE_TAGS} />
+                </RequireCoach>
+              </RequireAuth>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

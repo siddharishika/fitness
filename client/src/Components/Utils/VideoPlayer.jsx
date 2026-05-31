@@ -18,7 +18,6 @@ function VideoPlayer({ url }) {
     if (loaded && player) {
       player.play().catch((error) => {
         if (error.name !== "AbortError") {
-          console.error(error);
         }
       });
     }

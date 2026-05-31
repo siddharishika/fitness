@@ -71,9 +71,13 @@ export default function Rating(props) {
         newRatingCount: newCount,
       };
       try {
-        let res = await axios.patch(`${API_BASE_URL}/addrating/${props.videoId}`, data, {
-          withCredentials: true,
-        });
+        let res = await axios.patch(
+          `${API_BASE_URL}/addrating/${props.videoId}`,
+          data,
+          {
+            withCredentials: true,
+          },
+        );
 
         if (isAuthRequiredError(res)) {
           handleAuthRequired();

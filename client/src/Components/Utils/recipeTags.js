@@ -1,4 +1,3 @@
-/** Curated tags for recipes (meal type, diet, cooking style). */
 export const RECIPE_TAGS = [
   "Breakfast",
   "Brunch",
@@ -35,13 +34,18 @@ export const RECIPE_TAGS = [
 export function normalizeTags(value) {
   if (Array.isArray(value)) return value.filter(Boolean);
   if (typeof value === "string" && value.trim()) {
-    return value.split(",").map((t) => t.trim()).filter(Boolean);
+    return value
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
   }
   return [];
 }
 
-/** Merge predefined recipe tags with any legacy/existing tags already on a recipe. */
-export function mergeRecipeTagOptions(predefinedTags = RECIPE_TAGS, existingTags = []) {
+export function mergeRecipeTagOptions(
+  predefinedTags = RECIPE_TAGS,
+  existingTags = [],
+) {
   const merged = [...predefinedTags];
   normalizeTags(existingTags).forEach((tag) => {
     if (!merged.includes(tag)) {

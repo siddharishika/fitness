@@ -9,8 +9,7 @@ import DeleteAccountModal from "../Utils/DeleteAccountModal";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-const DEFAULT_PROFILE_IMAGE =
-  "https://via.placeholder.com/120x120?text=User";
+const DEFAULT_PROFILE_IMAGE = "https://via.placeholder.com/120x120?text=User";
 
 const cardStyle = {
   width: "100%",
@@ -64,8 +63,12 @@ function StatBlock({ label, count }) {
         backgroundColor: "#0e0f14",
       }}
     >
-      <div style={{ ...valueStyle, fontSize: "1.5rem", fontWeight: 600 }}>{count}</div>
-      <div style={{ ...labelStyle, marginTop: "6px", marginBottom: 0 }}>{label}</div>
+      <div style={{ ...valueStyle, fontSize: "1.5rem", fontWeight: 600 }}>
+        {count}
+      </div>
+      <div style={{ ...labelStyle, marginTop: "6px", marginBottom: 0 }}>
+        {label}
+      </div>
     </div>
   );
 }
@@ -106,9 +109,7 @@ function MyAccount() {
       await axios.get(`${API_BASE_URL}/logout`, { withCredentials: true });
       setUser(null);
       navigate("/login");
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) {}
   };
 
   const handleDeleteAccount = async () => {
@@ -126,7 +127,8 @@ function MyAccount() {
         return;
       }
       setDeleteError(
-        err.response?.data?.msg || "Could not delete your account. Please try again."
+        err.response?.data?.msg ||
+          "Could not delete your account. Please try again.",
       );
     } finally {
       setDeleting(false);
@@ -170,7 +172,9 @@ function MyAccount() {
             >
               <img
                 src={account.fileUrl || DEFAULT_PROFILE_IMAGE}
-                alt={account.username ? `${account.username} profile` : "Profile"}
+                alt={
+                  account.username ? `${account.username} profile` : "Profile"
+                }
                 width={140}
                 height={140}
                 style={{
@@ -184,7 +188,14 @@ function MyAccount() {
                   e.currentTarget.src = DEFAULT_PROFILE_IMAGE;
                 }}
               />
-              <h2 style={{ color: "#f4f4f8", fontSize: "1.35rem", marginBottom: "6px", textAlign: "center" }}>
+              <h2
+                style={{
+                  color: "#f4f4f8",
+                  fontSize: "1.35rem",
+                  marginBottom: "6px",
+                  textAlign: "center",
+                }}
+              >
                 {account.username}
               </h2>
               <span
@@ -223,9 +234,18 @@ function MyAccount() {
                   marginTop: "10px",
                 }}
               >
-                <StatBlock label="Videos" count={account.likedVideos?.length ?? 0} />
-                <StatBlock label="Programs" count={account.likedPrograms?.length ?? 0} />
-                <StatBlock label="Recipes" count={account.likedRecipes?.length ?? 0} />
+                <StatBlock
+                  label="Videos"
+                  count={account.likedVideos?.length ?? 0}
+                />
+                <StatBlock
+                  label="Programs"
+                  count={account.likedPrograms?.length ?? 0}
+                />
+                <StatBlock
+                  label="Recipes"
+                  count={account.likedRecipes?.length ?? 0}
+                />
               </div>
             </div>
           </div>

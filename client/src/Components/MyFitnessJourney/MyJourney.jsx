@@ -36,7 +36,9 @@ function MyJourney() {
     }
     getUser();
   }, []);
-  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "videos");
+  const [activeTab, setActiveTab] = useState(
+    location.state?.activeTab || "videos",
+  );
 
   useEffect(() => {
     if (location.state?.activeTab) {
@@ -45,7 +47,10 @@ function MyJourney() {
   }, [location.state?.activeTab]);
 
   useEffect(() => {
-    if (!userIsCoach && ["myVideos", "myPrograms", "myRecipes"].includes(activeTab)) {
+    if (
+      !userIsCoach &&
+      ["myVideos", "myPrograms", "myRecipes"].includes(activeTab)
+    ) {
       setActiveTab("videos");
     }
   }, [userIsCoach, activeTab]);
@@ -83,84 +88,112 @@ function MyJourney() {
 
   return (
     <>
-    <div>
-      <h1>My Journey</h1>
+      <div>
+        <h1>My Journey</h1>
 
-      {!userIsCoach && authUser && (
-        <div
-          style={{
-            width: "100%",
-            marginBottom: "16px",
-            padding: "16px 20px",
-            borderRadius: "10px",
-            border: "2px solid #A7C7E7",
-            backgroundColor: "#161823",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "12px",
-          }}
-        >
-          <p style={{ color: "#f4f4f8", margin: 0 }}>
-            Register as coach by editing account to post your own content.
-          </p>
-          <button
-            type="button"
-            onClick={() => navigate("/edituser")}
+        {!userIsCoach && authUser && (
+          <div
             style={{
-              padding: "8px 16px",
-              borderRadius: "8px",
+              width: "100%",
+              marginBottom: "16px",
+              padding: "16px 20px",
+              borderRadius: "10px",
               border: "2px solid #A7C7E7",
-              backgroundColor: "transparent",
-              color: "#A7C7E7",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
+              backgroundColor: "#161823",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
             }}
           >
-            Edit Account
+            <p style={{ color: "#f4f4f8", margin: 0 }}>
+              Register as coach by editing account to post your own content.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate("/edituser")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "8px",
+                border: "2px solid #A7C7E7",
+                backgroundColor: "transparent",
+                color: "#A7C7E7",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Edit Account
+            </button>
+          </div>
+        )}
+
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            flexWrap: "wrap",
+            marginBottom: "16px",
+          }}
+        >
+          <button
+            onClick={handleUserLikedVideos}
+            style={tabButtonStyle(activeTab === "videos")}
+          >
+            Liked Videos
+          </button>
+          <button
+            onClick={handleUserLikedPrograms}
+            style={tabButtonStyle(activeTab === "programs")}
+          >
+            Liked Programs
+          </button>
+          <button
+            onClick={handleLikedRecipes}
+            style={tabButtonStyle(activeTab === "recipes")}
+          >
+            Liked Recipes
+          </button>
+          {userIsCoach && (
+            <>
+              <button
+                onClick={handleMyVideos}
+                style={tabButtonStyle(activeTab === "myVideos")}
+              >
+                My Videos
+              </button>
+              <button
+                onClick={handleMyPrograms}
+                style={tabButtonStyle(activeTab === "myPrograms")}
+              >
+                My Programs
+              </button>
+              <button
+                onClick={handleMyRecipes}
+                style={tabButtonStyle(activeTab === "myRecipes")}
+              >
+                My Recipes
+              </button>
+            </>
+          )}
+          <button
+            onClick={handleMyAccount}
+            style={tabButtonStyle(activeTab === "myAccount")}
+          >
+            My Account
           </button>
         </div>
-      )}
 
-      <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
-        <button onClick={handleUserLikedVideos} style={tabButtonStyle(activeTab === "videos")}>
-          Liked Videos
-        </button>
-        <button onClick={handleUserLikedPrograms} style={tabButtonStyle(activeTab === "programs")}>
-          Liked Programs
-        </button>
-        <button onClick={handleLikedRecipes} style={tabButtonStyle(activeTab === "recipes")}>
-          Liked Recipes
-        </button>
-        {userIsCoach && (
-          <>
-            <button onClick={handleMyVideos} style={tabButtonStyle(activeTab === "myVideos")}>
-              My Videos
-            </button>
-            <button onClick={handleMyPrograms} style={tabButtonStyle(activeTab === "myPrograms")}>
-              My Programs
-            </button>
-            <button onClick={handleMyRecipes} style={tabButtonStyle(activeTab === "myRecipes")}>
-              My Recipes
-            </button>
-          </>
-        )}
-        <button onClick={handleMyAccount} style={tabButtonStyle(activeTab === "myAccount")}>
-          My Account
-        </button>
+        <div>
+          {activeTab === "videos" && <LikedVideos />}
+          {activeTab === "programs" && <LikedPrograms />}
+          {activeTab === "recipes" && <LikedRecipes />}
+          {userIsCoach && activeTab === "myVideos" && <MyVideos />}
+          {userIsCoach && activeTab === "myPrograms" && <MyPrograms />}
+          {userIsCoach && activeTab === "myRecipes" && <MyRecipes />}
+          {activeTab === "myAccount" && <MyAccount />}
+        </div>
       </div>
-
-      <div>
-        {activeTab === "videos" && <LikedVideos />}
-        {activeTab === "programs" && <LikedPrograms />}
-        {activeTab === "recipes" && <LikedRecipes />}
-        {userIsCoach && activeTab === "myVideos" && <MyVideos />}
-        {userIsCoach && activeTab === "myPrograms" && <MyPrograms />}
-        {userIsCoach && activeTab === "myRecipes" && <MyRecipes />}
-        {activeTab === "myAccount" && <MyAccount />}
-      </div>
-    </div>
     </>
   );
 }

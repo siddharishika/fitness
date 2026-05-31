@@ -22,7 +22,13 @@ export default function RouteToastListener() {
       replace: true,
       state: Object.keys(restState).length ? restState : null,
     });
-  }, [location.key, location.pathname, location.search, location.state, navigate]);
+  }, [
+    location.key,
+    location.pathname,
+    location.search,
+    location.state,
+    navigate,
+  ]);
 
   return (
     <AuthToast

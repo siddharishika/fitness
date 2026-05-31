@@ -12,15 +12,9 @@ import axios from "axios";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-// var fileId="";
-// var filePath="";
-// var fileUrl="";
-
 function Upload(tags) {
   const navigate = useNavigate();
   let [file, setFile] = useState();
-  // let [name, setName]=useState("");
-  // const [source, setSource] = React.useState();
   let fileRef = useRef();
   let nameRef = useRef("");
   let tagRef = useRef("");
@@ -40,25 +34,12 @@ function Upload(tags) {
     setArr(arr1);
   };
 
-  // let [fileId,setFileId]=useState("");
   let formData = {};
-  function fn(fileId, filePath, fileUrl) {
-    // formData.fileId=fileId;
-    // formData.filePath=filePath;
-    // formData.fileUrl=fileUrl;
-  }
+  function fn(fileId, filePath, fileUrl) {}
   const onSuccess = (res) => {
-    console.log("Success");
-    // fileId=res.fileId;
     setFileId(res.fileId);
     setFilePath(res.filePath);
     setFileUrl(res.url);
-    // // fileId=res;
-    // // filePath=res.filePath;
-    // // fileUrl=res.url;
-    // fn(fileId, filePath, fileUrl);
-    // fn(fileId);
-    // setFileId(res.fileId);
     setFlag(true);
     return res;
   };
@@ -72,8 +53,6 @@ function Upload(tags) {
   let handleSubmit = async function (e) {
     e.preventDefault();
 
-    // formData.id=id.id;
-    // let formData={};
     formData.name = nameRef.current.value;
     formData.tags = arr;
     formData.fileId = fileId;
@@ -83,20 +62,16 @@ function Upload(tags) {
     formData.imgFilePath = ImgFilePath;
     formData.imgFileUrl = ImgFileUrl;
 
-    // formData.fileId=fileId;
     if (flag) {
       try {
         let res = await axios.post(
           `${API_BASE_URL}/addvideo`,
           { formData },
-          { withCredentials: true }
+          { withCredentials: true },
         );
         navigate("/");
-      } catch (e) {
-        console.log(e, "Nahi ho payega");
-      }
+      } catch (e) {}
     } else {
-      console.log("Please wait");
     }
   };
 
@@ -112,11 +87,6 @@ function Upload(tags) {
           name="name"
           required
         />
-
-        {/* <div>
-            <label htmlFor="img">Img</label>
-            <input type="file" name="img" id="img" placeholder="Img" />
-        </div>     */}
         <label htmlFor="fitnessVideo"></label>
         <label htmlFor="Video">Video:</label>
         <IKUpload
@@ -128,12 +98,9 @@ function Upload(tags) {
           isPrivateFile={false}
           required
         />
-
         <label htmlFor="Image">Image:</label>
-        {/* <input type="file" ref={fileRef} onChange={handleFileChange}/> */}
         <IKUpload
           fileName={name + "img"}
-          // onError={onError}
           placeholder="Image"
           folder={"/fitnessImages"}
           onSuccess={onSuccess2}
@@ -147,24 +114,11 @@ function Upload(tags) {
           </div>
         </IconContext.Provider>
         <ul>
-          {arr && arr.map(function (ele, idx) {
-            return <li key={idx}>{ele}</li>;
-          })}
+          {arr &&
+            arr.map(function (ele, idx) {
+              return <li key={idx}>{ele}</li>;
+            })}
         </ul>
-        {/* <input type='text' /> */}
-        {/* {<button onClick={handleFileChange}>Choose</button>} */}
-        {/* {  
-        check()
-      } */}
-        {/* {source && (
-        <video
-          className="VideoInput_video"
-          width="100%"
-          height="20%"
-          controls
-          src={source}
-        />
-      )} */}
         <button type="submit">Upload File</button>
       </form>
     </>

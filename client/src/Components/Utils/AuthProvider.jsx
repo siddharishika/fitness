@@ -1,7 +1,5 @@
-// client/src/AuthContext.jsx
-import axios from 'axios';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-
+import axios from "axios";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;

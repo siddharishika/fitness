@@ -4,7 +4,7 @@ export function getUserRatingEntry(ratings, userId) {
   }
   return (
     ratings.find(
-      (entry) => String(entry.user?._id ?? entry.user) === String(userId)
+      (entry) => String(entry.user?._id ?? entry.user) === String(userId),
     ) ?? null
   );
 }

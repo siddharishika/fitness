@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Container, Form } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
-import TagAdderEdit from '../Utils/TagAdderEdit';
-import { useLoginPrompt } from '../Utils/useLoginPrompt';
+import { Button, Container, Form } from "react-bootstrap";
+import { useLocation, useNavigate } from "react-router-dom";
+import TagAdderEdit from "../Utils/TagAdderEdit";
+import { useLoginPrompt } from "../Utils/useLoginPrompt";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
@@ -17,7 +17,10 @@ const submitBtnStyle = {
 function normalizeTags(value) {
   if (Array.isArray(value)) return value.filter(Boolean);
   if (typeof value === "string" && value.trim()) {
-    return value.split(",").map((t) => t.trim()).filter(Boolean);
+    return value
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
   }
   return [];
 }
@@ -37,7 +40,9 @@ function EditVideo(props) {
   const { loginModal, handleAuthResponse } = useLoginPrompt();
 
   const [video, setVideo] = useState(initialData);
-  const [selectedTags, setSelectedTags] = useState(() => normalizeTags(initialData.tags));
+  const [selectedTags, setSelectedTags] = useState(() =>
+    normalizeTags(initialData.tags),
+  );
   const [loading, setLoading] = useState(!!initialData._id);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -60,7 +65,9 @@ function EditVideo(props) {
         setSelectedTags(normalizeTags(data.tags));
       } catch (e) {
         handleAuthResponse(e, { redirect: true });
-        setError("Could not load video. Open it from your videos and try again.");
+        setError(
+          "Could not load video. Open it from your videos and try again.",
+        );
       } finally {
         setLoading(false);
       }
@@ -98,14 +105,26 @@ function EditVideo(props) {
     try {
       let res;
       if (f && imgf) {
-        await axios.delete(`${API_BASE_URL}/delete/${videoId}`, { withCredentials: true });
-        res = await axios.post(`${API_BASE_URL}/add`, formData, { withCredentials: true });
+        await axios.delete(`${API_BASE_URL}/delete/${videoId}`, {
+          withCredentials: true,
+        });
+        res = await axios.post(`${API_BASE_URL}/add`, formData, {
+          withCredentials: true,
+        });
       } else if (f && !imgf) {
-        res = await axios.patch(`${API_BASE_URL}/edit/f`, formData, { withCredentials: true });
+        res = await axios.patch(`${API_BASE_URL}/edit/f`, formData, {
+          withCredentials: true,
+        });
       } else if (imgf && !f) {
-        res = await axios.patch(`${API_BASE_URL}/edit/imgf/${videoId}`, formData, { withCredentials: true });
+        res = await axios.patch(
+          `${API_BASE_URL}/edit/imgf/${videoId}`,
+          formData,
+          { withCredentials: true },
+        );
       } else {
-        res = await axios.patch(`${API_BASE_URL}/edit/${videoId}`, formData, { withCredentials: true });
+        res = await axios.patch(`${API_BASE_URL}/edit/${videoId}`, formData, {
+          withCredentials: true,
+        });
       }
 
       if (handleAuthResponse(res, { redirect: true })) {
@@ -146,7 +165,9 @@ function EditVideo(props) {
   if (!initialData._id && !video._id) {
     return (
       <Container className="p-4 border rounded text-center">
-        <p style={{ color: "#A7C7E7" }}>No video selected. Open a video and choose Edit.</p>
+        <p style={{ color: "#A7C7E7" }}>
+          No video selected. Open a video and choose Edit.
+        </p>
       </Container>
     );
   }
@@ -163,7 +184,11 @@ function EditVideo(props) {
     <>
       <div className="mx-auto">
         <Container className="p-4 border rounded">
-          <Form onSubmit={handleSubmit} encType="multipart/form-data" method="POST">
+          <Form
+            onSubmit={handleSubmit}
+            encType="multipart/form-data"
+            method="POST"
+          >
             <div className="text-center mb-4">
               <h2 style={{ color: "#A7C7E7" }}>Edit your video here!</h2>
             </div>
@@ -196,13 +221,29 @@ function EditVideo(props) {
             </Form.Group>
 
             <Form.Group controlId="formFileLg" className="mb-3">
-              <Form.Label>If you want to change video, please select video</Form.Label>
-              <Form.Control type="file" name="file" ref={fileRef} accept="video/*" size="lg" />
+              <Form.Label>
+                If you want to change video, please select video
+              </Form.Label>
+              <Form.Control
+                type="file"
+                name="file"
+                ref={fileRef}
+                accept="video/*"
+                size="lg"
+              />
             </Form.Group>
 
             <Form.Group controlId="formFileImg" className="mb-3">
-              <Form.Label>If you want to change image, please select image</Form.Label>
-              <Form.Control type="file" name="imgFile" ref={imgFileRef} accept="image/*" size="lg" />
+              <Form.Label>
+                If you want to change image, please select image
+              </Form.Label>
+              <Form.Control
+                type="file"
+                name="imgFile"
+                ref={imgFileRef}
+                accept="image/*"
+                size="lg"
+              />
             </Form.Group>
 
             <Button

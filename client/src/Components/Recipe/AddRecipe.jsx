@@ -86,7 +86,6 @@ function AddRecipe(props) {
       if (handleAuthResponse(err, { redirect: true })) {
         return;
       }
-      console.log(err, "Nahi ho payega");
     }
   };
 
@@ -170,8 +169,13 @@ function AddRecipe(props) {
               </Row>
               <ul className="list-unstyled mb-0">
                 {ingredients.map((item, idx) => (
-                  <li key={idx} className="d-flex align-items-center gap-2 mb-1">
-                    <span>{item.ingredient} — {item.amount}grams</span>
+                  <li
+                    key={idx}
+                    className="d-flex align-items-center gap-2 mb-1"
+                  >
+                    <span>
+                      {item.ingredient} — {item.amount}grams
+                    </span>
                     <Button
                       variant="link"
                       className="text-danger p-0"
@@ -236,7 +240,12 @@ function AddRecipe(props) {
               />
             </Form.Group>
 
-            <Button variant="light" style={submitBtnStyle} type="submit" className="w-100">
+            <Button
+              variant="light"
+              style={submitBtnStyle}
+              type="submit"
+              className="w-100"
+            >
               Submit
             </Button>
           </Form>

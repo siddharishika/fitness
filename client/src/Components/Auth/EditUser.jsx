@@ -8,8 +8,7 @@ import { useLoginPrompt } from "../Utils/useLoginPrompt";
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || window.location.origin;
 
-const DEFAULT_PROFILE_IMAGE =
-  "https://via.placeholder.com/120x120?text=User";
+const DEFAULT_PROFILE_IMAGE = "https://via.placeholder.com/120x120?text=User";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const submitBtnStyle = {
@@ -131,7 +130,9 @@ function EditUser() {
         return;
       }
       if (password !== passwordConfirm) {
-        setPasswordError("Passwords do not match. Please re-enter your confirm password.");
+        setPasswordError(
+          "Passwords do not match. Please re-enter your confirm password.",
+        );
         return;
       }
     }
@@ -175,7 +176,7 @@ function EditUser() {
       setError(
         err?.response?.data?.msg ||
           err?.response?.data?.message ||
-          "Could not update account. Please try again."
+          "Could not update account. Please try again.",
       );
     } finally {
       setSubmitting(false);
@@ -193,7 +194,11 @@ function EditUser() {
   return (
     <div className="mx-auto">
       <Container className="p-4 border rounded">
-        <Form onSubmit={handleSubmit} encType="multipart/form-data" method="POST">
+        <Form
+          onSubmit={handleSubmit}
+          encType="multipart/form-data"
+          method="POST"
+        >
           <div className="text-center mb-4">
             <h2 style={{ color: "#A7C7E7" }}>Edit Account</h2>
             <p style={{ color: "#A7C7E7" }}>Update your profile details.</p>
@@ -302,7 +307,8 @@ function EditUser() {
           <Form.Label>Role</Form.Label>
           {registerAsCoach && (
             <p style={{ color: "#A7C7E7", fontSize: "0.9rem" }}>
-              Coach is selected. Save your changes to register and start posting content.
+              Coach is selected. Save your changes to register and start posting
+              content.
             </p>
           )}
           <div className="mb-3">
@@ -373,7 +379,9 @@ function EditUser() {
               type="button"
               style={submitBtnStyle}
               className="flex-grow-1"
-              onClick={() => navigate("/myjourney", { state: { activeTab: "myAccount" } })}
+              onClick={() =>
+                navigate("/myjourney", { state: { activeTab: "myAccount" } })
+              }
             >
               Cancel
             </Button>
