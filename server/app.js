@@ -99,9 +99,16 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .catch(() => {});
+  .then(() => {
+    console.log("MongoDB connected successfully");
+  })
+  .catch((err) => {
+    console.error("MongoDB connection failed:", err);
+  });
 
-const server = app.listen(PORT);
+const server = app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
